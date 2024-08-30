@@ -7,3 +7,4 @@ Different structure of auto-correction of selenium elements and smart report and
 -Asserts inside of methods.
 -Choose 3 kind of web browsers to execute your automation.
 -Edit your Hooks for each signature.
+-Invoke sikuli to use automation with png or jpg images
