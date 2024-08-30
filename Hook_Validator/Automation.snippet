@@ -1,0 +1,377 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Selenium Click</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Selenium Click</Description>
+      <Shortcut>seleClick</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[  
+            [FindsBy(How = How.xxx, Using = "path")]
+            [CacheLookup]
+            public IWebElement button { get; set; }
+
+            public bool nomeDoMetodoClick()
+            {
+                List<object> objectDisplay = new List<object>();
+                WebDriverWait wait = new WebDriverWait(Selenium.driver, TimeSpan.FromSeconds(10));
+                wait.Until(ExpectedConditions.ElementIsVisible(By.xxx("path")));
+                objectDisplay.Add(Validation.ValidateElementVisible(button));
+                if (objectDisplay.Contains(false)) { return false; }
+                button.Click();
+                return true;
+            }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Selenium SendKey</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Selenium SendKey</Description>
+      <Shortcut>seleSend</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[  
+            [FindsBy(How = How.xxx, Using = "path")]
+            [CacheLookup]
+            public IWebElement textBox { get; set; }
+
+            public bool nomeDoMetodoDeSendKeys()
+            {
+                List<object> objectDisplay = new List<object>();
+                WebDriverWait wait = new WebDriverWait(Selenium.driver, TimeSpan.FromSeconds(10));
+                wait.Until(ExpectedConditions.ElementIsVisible(By.xxx("path")));
+                objectDisplay.Add(Validation.ValidateElementVisible(textBox));
+                if (objectDisplay.Contains(false)) { return false; }
+                textBox.SendKeys("string");
+                return true;
+            }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Selenium PageObject</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Selenium PageObject</Description>
+      <Shortcut>seleFind</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[  
+            [FindsBy(How = How.xxx, Using = "path")]
+            [CacheLookup]
+            public IWebElement element { get; set; }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Selenium PageObjectList</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Selenium PageObjectList</Description>
+      <Shortcut>seleFindList</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[  
+            [FindsBy(How = How.xxx, Using = "path")]
+            [CacheLookup]
+            public IList<IWebElement> element { get; set; }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Selenium PageFactory</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Selenium PageFactory</Description>
+      <Shortcut>seleFactory</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[  
+            public insiraONomeDaClasseAtual()
+        {
+            PageFactory.InitElements(Selenium.driver, this);
+        }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Selenium Navigate</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Selenium Method Navigate</Description>
+      <Shortcut>seleOpenBrowser</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[  
+         public bool openBrowser(string url)
+        {
+            Utility.OpenPage(Selenium.driver, url);
+            return true;
+        }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Selenium ScenarioContext</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Selenium ScenarioContext</Description>
+      <Shortcut>seleContextScenario</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[ScenarioContext.Current.ScenarioInfo.Title.Equals("");]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Selenium StepContext</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Selenium StepContext</Description>
+      <Shortcut>seleContextStep</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[ScenarioContext.Current.StepContext.StepInfo.Text.Equals("")]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Selenium FeatureContext</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Selenium FeatureContext</Description>
+      <Shortcut>seleContextFeature</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[FeatureContext.Current.FeatureInfo.Title.Equals("");]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Selenium ListFor</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Selenium ListFor</Description>
+      <Shortcut>seleListFor</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[
+            [FindsBy(How = How.xxx, Using = "path")]
+            [CacheLookup]
+            public IWebElement item { get; set; }
+
+            public bool listaComFor()
+        {
+            WebDriverWait wait = new WebDriverWait(Selenium.driver, TimeSpan.FromSeconds(10));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.xxx("path")));
+            IList<IWebElement> list = Selenium.driver.FindElements(By.xxx("path"));
+            bool exist = false;
+            for (int pos = 0; pos < list.Count; pos++)
+            {
+                item = list[pos];
+                if (item.GetAttribute("innerText").Equals("string"))
+                {
+                    exist = true;
+                    Utility.HighlightElementPass(item);
+                    item.Click();
+                    break;
+                }
+            }
+            if (exist == false)
+            {
+                Utility.HighlightElementFail(item);
+                return false;
+            }
+            return true;
+        }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Selenium ListForEach</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Selenium ListForEach</Description>
+      <Shortcut>seleListForEach</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[
+          public bool listaComForEach()
+        {
+            List<object> objectDisplay = new List<object>();
+            WebDriverWait wait = new WebDriverWait(Selenium.driver, TimeSpan.FromSeconds(10));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.xxx("path"));
+            IWebElement list = Selenium.driver.FindElement(By.xxx("path of list"));
+            var rows = list.FindElements(By.TagName("tr"));
+            foreach (IWebElement row in rows)
+            {
+                if (row.GetAttribute("innerText").Equals(string))
+                {
+                    objectDisplay.Add(Validation.ValidateElementEqualsText(row, "string"));
+                    break;
+                }                
+            }
+            return true;
+        }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Specflow Hooks</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill Specflow Hooks</Description>
+      <Shortcut>seleHooks</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[
+        [BeforeTestRun]
+        public static void BeforeTestRun() 
+        {
+            //Inserir o caminho da saída do relatório e screenshot
+            Hook.BeforeTestRun(@"\Report\");  
+        }
+        [BeforeFeature]
+        public static void BeforeFeature()
+        {
+            Hook.BeforeFeature();
+        }
+        [BeforeScenario]
+        public static void BeforeScenario()
+        {
+            //Edge
+            //Firefox
+            //Chrome
+            Hook.BeforeScenario("Chrome");
+        }
+        [AfterStep]
+        public static void AfterStep()
+        {
+            Hook.AfterStep();
+        }
+        [AfterScenario]
+        public static void AfterScenario()
+        {
+            Hook.AfterScenario();
+        }
+        [AfterTestRun]
+        public static void AfterTestRun()
+        {
+            Hook.AfterTestRun();
+        }]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+  
+ <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>NUnit Assert</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill NUnit Assert</Description>
+      <Shortcut>seleAssert</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[
+            bool _result = xxx;
+            Assert.IsTrue(_result, "string  ", null);]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>IJavaScript</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill NUnit Assert</Description>
+      <Shortcut>jsScrooll</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[
+            IJavaScriptExecutor js = Selenium.driver as IJavaScriptExecutor;
+            js.ExecuteScript("window.scrollBy(0, 1000)", "");]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>IJavaScript</Title>
+      <Author>Eduardo</Author>
+      <Description>Auto-Fill NUnit Assert</Description>
+      <Shortcut>jsScroollView</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[
+            IJavaScriptExecutor js = Selenium.driver as IJavaScriptExecutor;
+            js.ExecuteScript("arguments[0].scrollIntoView();", elemento);]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+  
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Sikuli Invoke</Title>
+      <Author>Eduardo</Author>
+      <Description>Sikili methods</Description>
+      <Shortcut>sikuli</Shortcut>
+    </Header>
+    <Snippet>
+      <Code Language="CSharp">
+        <![CDATA[        
+            // O Sikuli não funcionará se estiver com o Desktop ligado no OneDrive da Microsoft
+            // Sugerido é que o projeto seja trabalhado no driver C: evitando o OneDrive tenha acesso.
+            
+            string alvoInicial = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + @"\Caminho dentro do projeto a imagem";
+            string alvoFinal = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + @"\Caminho dentro do projeto a imagem";
+           
+           APILauncher launcher = new APILauncher(true);
+            launcher.Start();
+            
+            Pattern elemento = new Pattern(@"C:\imagem.PNG");
+            Screen screen = new Screen();
+            
+            screen.Wait(elemento, true); 
+            screen.Click(elemento, true);
+            screen.DoubleClick(elemento, true);      
+            screen.RightClick(elemento, true);            
+            screen.DragDrop(teste, teste2);
+            screen.Type(elemento, "String do elemento" + Key.ENTER);
+            bool vanished = scrn.WaitVanish(pattern_ChromeIcon, 10);
+            bool exists = scrn.Exists(pattern_ChromeIcon, 10);           
+            
+            launcher.Stop();]]>
+      </Code>
+    </Snippet>
+  </CodeSnippet>
+
+</CodeSnippets>

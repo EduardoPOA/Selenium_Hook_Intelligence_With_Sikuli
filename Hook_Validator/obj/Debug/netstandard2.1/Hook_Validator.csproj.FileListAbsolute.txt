@@ -1,0 +1,10 @@
+C:\Users\eduar\Downloads\net standard\Hook_Validator\Hook_Validator\bin\Debug\netstandard2.1\Hook_Validator.deps.json
+C:\Users\eduar\Downloads\net standard\Hook_Validator\Hook_Validator\bin\Debug\netstandard2.1\Hook_Validator.dll
+C:\Users\eduar\Downloads\net standard\Hook_Validator\Hook_Validator\bin\Debug\netstandard2.1\Hook_Validator.pdb
+C:\Users\eduar\Downloads\net standard\Hook_Validator\Hook_Validator\obj\Debug\netstandard2.1\Hook_Validator.csprojAssemblyReference.cache
+C:\Users\eduar\Downloads\net standard\Hook_Validator\Hook_Validator\obj\Debug\netstandard2.1\Hook_Validator.AssemblyInfoInputs.cache
+C:\Users\eduar\Downloads\net standard\Hook_Validator\Hook_Validator\obj\Debug\netstandard2.1\Hook_Validator.AssemblyInfo.cs
+C:\Users\eduar\Downloads\net standard\Hook_Validator\Hook_Validator\obj\Debug\netstandard2.1\Hook_Validator.csproj.CoreCompileInputs.cache
+C:\Users\eduar\Downloads\net standard\Hook_Validator\Hook_Validator\obj\Debug\netstandard2.1\Hook_Validator.dll
+C:\Users\eduar\Downloads\net standard\Hook_Validator\Hook_Validator\obj\Debug\netstandard2.1\Hook_Validator.pdb
+C:\Users\eduar\Downloads\net standard\Hook_Validator\Hook_Validator\bin\Debug\netstandard2.1\Dlls\JNI.dll
