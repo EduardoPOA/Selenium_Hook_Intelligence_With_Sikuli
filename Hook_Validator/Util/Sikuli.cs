@@ -9,18 +9,28 @@ namespace Hook_Validator.Util
     {
         private static SikuliDriver launcher;
         private static SikuliAction action = new SikuliAction();
+        private Process process;
 
-        public static void OpenExeApplication(string exePath)
+        public void OpenExeApplication(string exePath)
         {
-            Process process = new Process();
+            process = new Process();
             process.StartInfo.FileName = exePath;
             process.StartInfo.UseShellExecute = true;
             process.Start();
         }
 
-        public static string GetImageSolutionExplorer(string nomeImagem, string nomePasta = "")
+        public void CloseExeApplication()
         {
-            return action.GetImageSolutionExplorer(nomeImagem, nomePasta);
+            if (process != null && !process.HasExited)
+            {
+                process.Kill();
+                process.WaitForExit();
+            }
+        }
+
+        public static string GetImagePath(string nomeImagem, string nomePasta = "")
+        {
+            return action.GetImagePath(nomeImagem, nomePasta);
         }
 
         public static void Start()

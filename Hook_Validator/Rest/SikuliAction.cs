@@ -229,7 +229,7 @@ namespace Hook_Validator.Rest
         /// <param name="nomeImagem">Nome da imagem e extensão, ex: Teste.png.</param>
         /// <param name="nomePasta">Nome da pasta onde a imagem está localizada (deixe vazio para a raiz).</param>
         /// <returns>O caminho completo da imagem.</returns>
-        public string GetImageSolutionExplorer(string nomeImagem, string nomePasta = "")
+        public string GetImagePath(string nomeImagem, string nomePasta = "")
         {
             string baseDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string parentDirectory = Directory.GetParent(baseDirectory)?.Parent?.Parent?.FullName;
