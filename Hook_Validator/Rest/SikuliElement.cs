@@ -9,7 +9,7 @@ namespace Hook_Validator.Rest
     /// <summary>
     /// Descrição do Pattern.
     /// </summary>
-    public class Pattern
+    public class SikuliElement
 	{
 		/// <summary>
 		/// O caminho da imagem para executar as ações.
@@ -24,17 +24,17 @@ namespace Hook_Validator.Rest
 		/// </summary>
 		public Double Similar {get; set;}
 		
-		public Pattern() : this("", new Point(0,0), 0.7) {}
-		public Pattern(String imagePath) : this(imagePath, new Point(0,0), 0.7) {}
-		public Pattern(String imagePath, Point offset) : this(imagePath, offset, 0.7) {}
-		public Pattern(String imagePath, Double similar) : this(imagePath, new Point(0,0), similar) {}
+		public SikuliElement() : this("", new Point(0,0), 0.7) {}
+		public SikuliElement(String imagePath) : this(imagePath, new Point(0,0), 0.7) {}
+		public SikuliElement(String imagePath, Point offset) : this(imagePath, offset, 0.7) {}
+		public SikuliElement(String imagePath, Double similar) : this(imagePath, new Point(0,0), similar) {}
 		/// <summary>
 		/// Instancia uma nova instância do objeto Padrão, a ser usado pela ferramenta para encontrar a imagem especificada na tela.
 		/// </summary>
 		/// <param name="imagePath">O caminho para a imagem usada neste objeto padrão; geralmente estará no formato .png</param>
 		/// <param name="offset">O deslocamento de destino da imagem, indo do centro em 0,0, que é o padrão</param>
 		/// <param name="similar">A porcentagem de similaridade que a ferramenta procura ao pesquisar o padrão. 0,7 é o padrão (70%)</param>
-		public Pattern(String imagePath, Point offset, Double similar)
+		public SikuliElement(String imagePath, Point offset, Double similar)
 		{
 			ImagePath = imagePath;
 			Offset = offset;

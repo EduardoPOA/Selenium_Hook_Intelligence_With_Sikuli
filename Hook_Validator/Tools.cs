@@ -1056,35 +1056,6 @@ namespace Hook_Validator
         }
 
         /// <summary>
-        /// PROVISÓRIO PARA ARMAZENAR COM DATA CURRENT
-        ///  Cria evidencia inserindo um count
-        ///  Exemplo: Foto1, Foto2, Foto3....
-        ///  Evita de sobrescrever as antigas
-        /// </summary>
-        public static string TakeEvidenceScreenShot()
-        {
-            string data = DateTime.Now.ToString("dd-MM-yyyy");
-            string strLog = "Step";
-            string filePathPng = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + Hook.getPathEvidence + data + " " + strLog + ".PNG";
-            bool existe = false;
-            while (File.Exists(filePathPng))
-            {
-                existe = true;
-                writeFileTxt();
-                readFileTxt();
-                string fileCount = string.Format("{0}({1})", strLog, getCount);
-                filePathPng = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + Hook.getPathEvidence + data + " " + fileCount + ".PNG";
-                ((ITakesScreenshot)Selenium.driver).GetScreenshot().SaveAsFile(filePathPng, ScreenshotImageFormat.Png);
-                break;
-            }
-            if (existe == false)
-            {
-                ((ITakesScreenshot)Selenium.driver).GetScreenshot().SaveAsFile(filePathPng, ScreenshotImageFormat.Png);
-            }
-            return filePathPng;
-        }
-
-        /// <summary>
         ///  Antes de começar o projeto crie um método static void e execute este método.
         ///  Ele irá gerar as seguintes pastas:
         ///   - Pages

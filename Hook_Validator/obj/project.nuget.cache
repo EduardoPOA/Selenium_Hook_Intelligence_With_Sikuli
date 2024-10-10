@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "JgL+KMEI/aLGhTKVX6JxJMvjesYCMjckuTDukmgIZ9xh1uNmdfaK+y+WUFR8CGQq3xAQQOBnAqBva1BoFWNUrA==",
+  "dgSpecHash": "4kG0gWe1Vzo=",
   "success": true,
-  "projectFilePath": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Meus-Projetos\\PluginComSikuli\\net standard\\Hook_Validator\\Hook_Validator\\Hook_Validator.csproj",
+  "projectFilePath": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (4)\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\eduar\\.nuget\\packages\\anglesharp\\1.0.4\\anglesharp.1.0.4.nupkg.sha512",
     "C:\\Users\\eduar\\.nuget\\packages\\authlete.authlete\\1.5.0\\authlete.authlete.1.5.0.nupkg.sha512",

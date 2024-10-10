@@ -9977,11 +9977,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Meus-Projetos\\PluginComSikuli\\net standard\\Hook_Validator\\Hook_Validator\\Hook_Validator.csproj",
+      "projectUniqueName": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (4)\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
       "projectName": "Dudu_Automation_Sikuli",
-      "projectPath": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Meus-Projetos\\PluginComSikuli\\net standard\\Hook_Validator\\Hook_Validator\\Hook_Validator.csproj",
+      "projectPath": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (4)\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
       "packagesPath": "C:\\Users\\eduar\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Meus-Projetos\\PluginComSikuli\\net standard\\Hook_Validator\\Hook_Validator\\obj\\",
+      "outputPath": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (4)\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -9997,6 +9997,7 @@
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "C:\\Program Files\\dotnet\\library-packs": {},
+        "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (3)\\Meus-Projetos\\PluginComSikuli\\net standard\\Hook_Validator\\Hook_Validator\\bin\\Debug": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -10009,6 +10010,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -10073,7 +10079,7 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.400\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401\\RuntimeIdentifierGraph.json"
       }
     }
   }
