@@ -1,6 +1,7 @@
-﻿using Hook_Validator.Rest;
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
-using System;
+﻿/*
+ * @author Eduardo Oliveira
+ */
+using Hook_Validator.Rest;
 using System.Diagnostics;
 
 namespace Hook_Validator.Util
