@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Eduardo Oliveira")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0bee2bd4dbdd7a475afdd80a1c4248995dd66874")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+160e913440a93f677626587317b22841699a1a5e")]
 [assembly: System.Reflection.AssemblyProductAttribute("Eduardo Oliveira")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Hook_Validator")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
