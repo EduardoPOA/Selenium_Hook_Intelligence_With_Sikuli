@@ -211,25 +211,12 @@ namespace Hook_Validator.Rest
         }
 
         /// <summary>
-        /// Método para verificar o objeto json_Result e lançar uma exceção se o resultado não for PASSADO
-        /// </summary>
-        /// <param name="jResult">o json_Result para verificar</param>
-        public void FailIfResultNotPASS(json_Result jResult)
-        {
-            Util.Util.Log.WriteLine("Result: " + jResult.result + " Message: " + jResult.message + " Stacktrace: " + jResult.stacktrace);
-            if (!jResult.ToActionResult().Equals(ActionResult.PASS))
-            {
-                throw new SikuliActionException(jResult.ToActionResult(), jResult.message);
-            }
-        }
-
-        /// <summary>
-        /// Método para pegar as imagens diretamente do Solution Explorer, podendo estar na raiz ou dentro de uma pasta.
+        /// Método para pegar as imagens diretamente do Solution Explorer,  podendo estar em subpasta.
         /// </summary>        
         /// <param name="nomeImagem">Nome da imagem e extensão, ex: Teste.png.</param>
         /// <param name="nomePasta">Nome da pasta onde a imagem está localizada (deixe vazio para a raiz).</param>
         /// <returns>O caminho completo da imagem.</returns>
-        public string GetImagePath(string nomeImagem, string nomePasta = "")
+        public string GetImagePathFromSolutionExplorer(string nomeImagem, string nomePasta = "")
         {
             string baseDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string parentDirectory = Directory.GetParent(baseDirectory)?.Parent?.Parent?.FullName;
@@ -239,6 +226,33 @@ namespace Hook_Validator.Rest
             }
             string pathImage = Path.Combine(parentDirectory, nomeImagem);
             return pathImage;
+        }
+
+        /// <summary>
+        /// Método para pegar as imagens diretamente no caminho do bin até net8, podendo estar em subpasta.
+        /// </summary>        
+        /// <param name="nomeImagem">Nome da imagem e extensão, ex: Teste.png.</param>
+        /// <param name="nomePasta">Nome da pasta onde a imagem está localizada (deixe vazio para a raiz).</param>
+        /// <returns>O caminho completo da imagem.</returns>
+        public string GetImagePathFromBin(string nomeImagem, string nomePasta = "")
+        {
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string x86Directory = Path.Combine(baseDirectory, "x86", "Debug", "net8.0", nomePasta, nomeImagem);
+            if (File.Exists(x86Directory))
+            {
+                return x86Directory;
+            }
+            string x64Directory = Path.Combine(baseDirectory, "x64", "Debug", "net8.0", nomePasta, nomeImagem);
+            if (File.Exists(x64Directory))
+            {
+                return x64Directory;
+            }
+            string debugDirectory = Path.Combine(baseDirectory, "Debug", "net8.0", nomePasta, nomeImagem);
+            if (File.Exists(debugDirectory))
+            {
+                return debugDirectory;
+            }
+            return Path.Combine(baseDirectory, nomePasta, nomeImagem);
         }
 
     }
