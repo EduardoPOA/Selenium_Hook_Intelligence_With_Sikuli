@@ -211,6 +211,19 @@ namespace Hook_Validator.Rest
         }
 
         /// <summary>
+        /// Método para verificar o objeto json_Result e lançar uma exceção se o resultado não for PASSADO
+        /// </summary>
+        /// <param name="jResult">o json_Result para verificar</param>
+        public void FailIfResultNotPASS(json_Result jResult)
+        {
+            Util.Util.Log.WriteLine("Result: " + jResult.result + " Message: " + jResult.message + " Stacktrace: " + jResult.stacktrace);
+            if (!jResult.ToActionResult().Equals(ActionResult.PASS))
+            {
+                throw new SikuliActionException(jResult.ToActionResult(), jResult.message);
+            }
+        }
+
+        /// <summary>
         /// Método para pegar as imagens diretamente do Solution Explorer,  podendo estar em subpasta.
         /// </summary>        
         /// <param name="nomeImagem">Nome da imagem e extensão, ex: Teste.png.</param>

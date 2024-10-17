@@ -199,7 +199,7 @@ namespace Hook_Validator.Util
         /// Escreve o texto fornecido no elemento Sikuli especificado.
         /// </summary>
         /// <param name="pattern">O elemento Sikuli onde o texto será escrito.</param>
-        public static void Type(string element, string text, bool highlight)
+        public static void Type(string element, string text, bool highlight = false)
         {
             action.Type(Element(element), text, highlight);
         }
