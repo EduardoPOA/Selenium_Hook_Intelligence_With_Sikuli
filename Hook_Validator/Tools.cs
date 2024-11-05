@@ -1362,24 +1362,15 @@ namespace Hook_Validator
                 xml.Save(pathXml + xmlName);
                 GetCurrentTab();
                 string idElement = getElementId();
-                string cssElement = getElementCssSelector();
+                // string cssElement = getElementCssSelector();
                 string xpathElement = getElementRelativeXpath();
                 string by = null, value = null;
 
                 if (string.IsNullOrEmpty(idElement))
                 {
-                    if (cssElement.Length > xpathElement.Length)
-                    {
-                        by = "xpath";
-                        value = xpathElement;
-                        newByValue = By.XPath(value);
-                    }
-                    else
-                    {
-                        by = "css";
-                        value = cssElement;
-                        newByValue = By.CssSelector(value);
-                    }
+                    by = "xpath";
+                    value = xpathElement;
+                    newByValue = By.XPath(value);
                 }
                 else
                 {
@@ -1438,7 +1429,7 @@ namespace Hook_Validator
                 xml.Save(pathXml + xmlName);
                 GetCurrentTab();
                 string idElement = getElementId();
-                string cssElement = getElementCssSelector();
+                // string cssElement = getElementCssSelector();
                 string xpathElement = getElementRelativeXpath();
                 string by = null, value = null;
 
@@ -1662,32 +1653,37 @@ return css;
             IWebElement webElement = Selenium.driver.FindElement(By.XPath(getCorrection));
             IJavaScriptExecutor jsExec = Selenium.driver as IJavaScriptExecutor;
             string _result = QuoteLocator((string)jsExec.ExecuteScript(
-    @"
-function getXPath(element){
-    if(element.hasAttribute(""id"")){
-        return '//' + element.tagName.toLowerCase() + '[@id=""' + element.id + '""]';
+            @"
+    function getPathTo(element) {
+        let tagName = element.tagName.toLowerCase();
+        let attributes = [];
+        
+        if (element.id) {
+            attributes.push(`@id=""${element.id}""`);
+        } else if (element.name) {
+            attributes.push(`@name=""${element.name}""`);
+        } else if (element.className) {
+            let classList = element.className.trim().split(/\s+/).slice(0, 2).join(' ');
+            attributes.push(`contains(@class, ""${classList}"")`);
+        }
+        
+        if (element.textContent.trim().length > 0 && element.textContent.trim().length < 30) {
+            attributes.push(`text()=""${element.textContent.trim()}""`);
+        }
+        
+        let attributeString = attributes.length ? `[${attributes.join(' and ')}]` : '';
+        let xpath = `//${tagName}${attributeString}`;
+        
+        return xpath;
     }
+    
+    var element = arguments[0];
+    return getPathTo(element);
+    ", webElement));
 
-    if(element.hasAttribute(""class"")){
-        return '//' + element.tagName.toLowerCase() + '[@class=""' + element.getAttribute(""class"") + '""]';
-    }
-
-    if(element.hasAttribute(""name"")){
-        return '//' + element.tagName.toLowerCase() + '[@name=""' + element.getAttribute(""name"") + '""]';
-    }
-
-    var old = '/' + element.tagName.toLowerCase();
-    var new_path = this.xpath(element.parentNode) + old;
-
-    return new_path;
-}
-var element = arguments[0];
-var css = '';
-css = getXPath(element);
-return css;
-", webElement));
             return _result;
         }
+
 
         private static string QuoteLocator(string locator)
         {

@@ -5,10 +5,10 @@
   },
   "projects": {
     "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (4)\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj": {
-      "version": "1.0.0",
+      "version": "6.0.0",
       "restore": {
         "projectUniqueName": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (4)\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
-        "projectName": "Dudu_Automation_Sikuli",
+        "projectName": "Super_Automation_Sikuli",
         "projectPath": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (4)\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
         "packagesPath": "C:\\Users\\eduar\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (4)\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\obj\\",
@@ -27,7 +27,7 @@
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\library-packs": {},
-          "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (3)\\Meus-Projetos\\PluginComSikuli\\net standard\\Hook_Validator\\Hook_Validator\\bin\\Debug": {},
+          "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (4)\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\bin\\Debug": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -95,7 +95,7 @@
             },
             "WebDriverManager": {
               "target": "Package",
-              "version": "[2.17.1, )"
+              "version": "[2.17.4, )"
             }
           },
           "imports": [

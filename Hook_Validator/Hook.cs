@@ -58,6 +58,27 @@ namespace Hook_Validator
             htmlReport.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Dark;
             extent = new AventStack.ExtentReports.ExtentReports();
             extent.AttachReporter(htmlReport);
+
+            //este trecho deleta os folders dos browsers vindo do webmanager
+            foreach (var processName in new[] { "chromedriver", "msedgedriver", "geckodriver" })
+            {
+                foreach (var process in Process.GetProcessesByName(processName))
+                {
+                    process.Kill();
+                    process.WaitForExit();
+                }
+            }
+            string[] browserFolders = { "Chrome", "Edge", "Firefox" };
+            string baseFolderPath = AppDomain.CurrentDomain.BaseDirectory;
+            foreach (var browserFolder in browserFolders)
+            {
+                string browserFolderPath = Path.Combine(baseFolderPath, browserFolder);
+
+                if (Directory.Exists(browserFolderPath))
+                {
+                    Directory.Delete(browserFolderPath, true);
+                }
+            }
         }
 
         /// <summary>
