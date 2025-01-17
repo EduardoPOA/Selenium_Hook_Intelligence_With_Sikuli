@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "wXOyO03fm3Q=",
+  "dgSpecHash": "YFM0ocl6DZo=",
   "success": true,
   "projectFilePath": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Nova pasta (4)\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
   "expectedPackageFiles": [
@@ -200,5 +200,16 @@
     "C:\\Users\\eduar\\.nuget\\packages\\system.xml.xpath.xdocument\\4.3.0\\system.xml.xpath.xdocument.4.3.0.nupkg.sha512",
     "C:\\Users\\eduar\\.nuget\\packages\\webdrivermanager\\2.17.4\\webdrivermanager.2.17.4.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'DotNetZip' 1.16.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-xhg6-9j5j-w4vf",
+      "libraryId": "DotNetZip",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    }
+  ]
 }

@@ -12,13 +12,13 @@ namespace Hook_Validator.Util
     {
         private static SikuliDriver launcher;
         private static SikuliAction action = new SikuliAction();
-        private Process process;
+        private static Process process;
 
 
         /// <summary>
         /// Abre um aplicativo .exe especificado pelo caminho do arquivo.
         /// </summary>
-        public void OpenExeApplication(string exePath)
+        public static void OpenExeApplication(string exePath)
         {
             process = new Process();
             process.StartInfo.FileName = exePath;
@@ -30,7 +30,7 @@ namespace Hook_Validator.Util
         /// <summary>
         /// Fecha a aplicação do arquivo executável.
         /// </summary>
-        public void CloseExeApplication()
+        public static void CloseExeApplication()
         {
             if (process != null && !process.HasExited)
             {
@@ -45,9 +45,9 @@ namespace Hook_Validator.Util
         /// <param name="nomeImagem">Nome da imagem.</param>
         /// <param name="nomePasta">Nome da pasta onde a imagem está localizada.</param>
         /// <returns>Caminho completo da imagem.</returns>
-        public static SikuliElement GetImagePathFromSolutionExplorer(string nomeImagem, string nomePasta = "")
+        public static string GetImagePathFromSolutionExplorer(string nomeImagem, string nomePasta = "")
         {
-            return new SikuliElement(action.GetImagePathFromSolutionExplorer(nomeImagem, nomePasta));
+            return action.GetImagePathFromSolutionExplorer(nomeImagem, nomePasta);
         }
 
         /// <summary>
@@ -56,9 +56,9 @@ namespace Hook_Validator.Util
         /// <param name="nomeImagem">Nome da imagem.</param>
         /// <param name="nomePasta">Nome da pasta onde a imagem está localizada.</param>
         /// <returns>Caminho completo da imagem.</returns>
-        public static SikuliElement GetImagePathFromBin(string nomeImagem, string nomePasta = "")
+        public static string GetImagePathFromBin(string nomeImagem, string nomePasta = "")
         {
-            return new SikuliElement(action.GetImagePathFromBin(nomeImagem, nomePasta));
+            return action.GetImagePathFromBin(nomeImagem, nomePasta);
         }
 
         /// <summary>
@@ -210,9 +210,9 @@ namespace Hook_Validator.Util
         /// </summary>
         /// <param name="clickPattern">Padrão do elemento a ser clicado.</param>
         /// <param name="dropPattern">Padrão do elemento de destino.</param>
-        public static void DragDrop(string element, SikuliElement dropPattern)
+        public static void DragDrop(string element, string dropPattern)
         {
-            action.DragDrop(Element(element), dropPattern);
+            action.DragDrop(Element(element), Element(dropPattern));
         }
     }
 }
