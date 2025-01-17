@@ -1,4 +1,4 @@
-# Selenium_Hook_Intelligence
+# Selenium_Hook_Intelligence_With_Sikuli
 Different structure of auto-correction of selenium elements and smart report and evidence generator and much more
 
 # Structure
@@ -7,4 +7,4 @@ Different structure of auto-correction of selenium elements and smart report and
 -Asserts inside of methods.
 -Choose 3 kind of web browsers to execute your automation.
 -Edit your Hooks for each signature.
--Invoke sikuli to use automation with png or jpg images
+-Invoke Sikuli to use automation with png or jpg images
