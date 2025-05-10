@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <Import Project="$(NuGetPackageRoot)specflow\3.9.74\build\SpecFlow.targets" Condition="Exists('$(NuGetPackageRoot)specflow\3.9.74\build\SpecFlow.targets')" />
+    <Import Project="$(NuGetPackageRoot)system.text.json\8.0.5\buildTransitive\netstandard2.0\System.Text.Json.targets" Condition="Exists('$(NuGetPackageRoot)system.text.json\8.0.5\buildTransitive\netstandard2.0\System.Text.Json.targets')" />
+    <Import Project="$(NuGetPackageRoot)reqnroll\2.4.1\build\Reqnroll.targets" Condition="Exists('$(NuGetPackageRoot)reqnroll\2.4.1\build\Reqnroll.targets')" />
     <Import Project="$(NuGetPackageRoot)netstandard.library\2.0.3\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('$(NuGetPackageRoot)netstandard.library\2.0.3\build\netstandard2.0\NETStandard.Library.targets')" />
   </ImportGroup>
 </Project>

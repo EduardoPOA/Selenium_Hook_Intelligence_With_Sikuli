@@ -4,25 +4,18 @@
 using AventStack.ExtentReports;
 using AventStack.ExtentReports.Gherkin.Model;
 using AventStack.ExtentReports.Reporter;
-using Ionic.Zip;
-using Microsoft.Win32;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
-using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
+using Reqnroll;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Threading;
-using TechTalk.SpecFlow;
-using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
 
 namespace Hook_Validator
