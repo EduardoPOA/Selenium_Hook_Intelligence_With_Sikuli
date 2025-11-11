@@ -944,6 +944,16 @@ namespace Hook_Validator
         }
 
         /// <summary>
+        /// Invoca o Wait para usar estrutura Thread sleep
+        /// </summary>
+        /// <param name="timeout">Insere valor inteiro</param>
+        public static bool Wait(int timeout)
+        {
+            Thread.Sleep(timeout);
+            return false;
+        }
+
+        /// <summary>
         /// Invoca o WaitElement programado com a constante de 10 segundos
         /// </summary>
         /// <param name="element">Element referente o elemento instanciado pelo Selenium</param>
