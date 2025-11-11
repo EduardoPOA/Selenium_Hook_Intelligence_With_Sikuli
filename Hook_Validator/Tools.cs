@@ -24,6 +24,7 @@ namespace Hook_Validator
     public class Tools
     {
         private const int TIMEOUT_CONST = 10;
+        private const int TIMEOUT_DELAY = 200;
 
         private static string keyAttribute { get; set; }
 
@@ -947,7 +948,7 @@ namespace Hook_Validator
         /// Invoca o Wait para usar estrutura Thread sleep
         /// </summary>
         /// <param name="timeout">Insere valor inteiro</param>
-        public static bool Wait(int timeout)
+        public static bool Wait(int timeout = TIMEOUT_DELAY)
         {
             Thread.Sleep(timeout);
             return false;
