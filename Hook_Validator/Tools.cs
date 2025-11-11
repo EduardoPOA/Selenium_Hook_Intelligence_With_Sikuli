@@ -274,7 +274,64 @@ namespace Hook_Validator
         {
             IWebElement element = GetLocatorIWebElement(locator);
             ValidateElementVisible(element);
-            element.SendKeys(word);
+
+            // Tabela com TODAS as teclas do Selenium
+            Dictionary<string, string> specialKeys = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "Enter", Keys.Enter },
+        { "Tab", Keys.Tab },
+        { "Escape", Keys.Escape },
+        { "Space", Keys.Space },
+        { "Backspace", Keys.Backspace },
+        { "Delete", Keys.Delete },
+        { "Insert", Keys.Insert },
+        { "Home", Keys.Home },
+        { "End", Keys.End },
+        { "PageUp", Keys.PageUp },
+        { "PageDown", Keys.PageDown },
+        { "ArrowUp", Keys.ArrowUp },
+        { "ArrowDown", Keys.ArrowDown },
+        { "ArrowLeft", Keys.ArrowLeft },
+        { "ArrowRight", Keys.ArrowRight },
+        { "F1", Keys.F1 },
+        { "F2", Keys.F2 },
+        { "F3", Keys.F3 },
+        { "F4", Keys.F4 },
+        { "F5", Keys.F5 },
+        { "F6", Keys.F6 },
+        { "F7", Keys.F7 },
+        { "F8", Keys.F8 },
+        { "F9", Keys.F9 },
+        { "F10", Keys.F10 },
+        { "F11", Keys.F11 },
+        { "F12", Keys.F12 },
+        { "Ctrl", Keys.Control },
+        { "Control", Keys.Control },
+        { "Shift", Keys.Shift },
+        { "Alt", Keys.Alt }
+    };
+            //Combinações: Ctrl+A / Shift+Tab / etc
+            if (word.Contains("+"))
+            {
+                string[] keys = word.Split('+');
+                string combinedKeys = "";
+                foreach (string k in keys)
+                {
+                    string key = k.Trim();
+                    combinedKeys += specialKeys.ContainsKey(key) ? specialKeys[key] : key;
+                }
+                element.SendKeys(combinedKeys);
+                return true;
+            }
+            if (specialKeys.ContainsKey(word))
+            {
+                element.SendKeys(specialKeys[word]);
+            }
+            else
+            {
+                element.SendKeys(word);
+            }
+
             return true;
         }
 
@@ -285,9 +342,67 @@ namespace Hook_Validator
         public static bool SendKeyToElement(IWebElement element, string word)
         {
             ValidateElementVisible(element);
-            element.SendKeys(word);
+
+            Dictionary<string, string> specialKeys = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "Enter", Keys.Enter },
+        { "Tab", Keys.Tab },
+        { "Escape", Keys.Escape },
+        { "Space", Keys.Space },
+        { "Backspace", Keys.Backspace },
+        { "Delete", Keys.Delete },
+        { "Insert", Keys.Insert },
+        { "Home", Keys.Home },
+        { "End", Keys.End },
+        { "PageUp", Keys.PageUp },
+        { "PageDown", Keys.PageDown },
+        { "ArrowUp", Keys.ArrowUp },
+        { "ArrowDown", Keys.ArrowDown },
+        { "ArrowLeft", Keys.ArrowLeft },
+        { "ArrowRight", Keys.ArrowRight },
+        { "F1", Keys.F1 },
+        { "F2", Keys.F2 },
+        { "F3", Keys.F3 },
+        { "F4", Keys.F4 },
+        { "F5", Keys.F5 },
+        { "F6", Keys.F6 },
+        { "F7", Keys.F7 },
+        { "F8", Keys.F8 },
+        { "F9", Keys.F9 },
+        { "F10", Keys.F10 },
+        { "F11", Keys.F11 },
+        { "F12", Keys.F12 },
+        { "Ctrl", Keys.Control },
+        { "Control", Keys.Control },
+        { "Shift", Keys.Shift },
+        { "Alt", Keys.Alt }
+    };
+            if (word.Contains("+"))
+            {
+                string[] keys = word.Split('+');
+                string combinedKeys = "";
+
+                foreach (string k in keys)
+                {
+                    string key = k.Trim();
+                    combinedKeys += specialKeys.ContainsKey(key) ? specialKeys[key] : key;
+                }
+
+                element.SendKeys(combinedKeys);
+                return true;
+            }
+            if (specialKeys.ContainsKey(word))
+            {
+                element.SendKeys(specialKeys[word]);
+            }
+            else
+            {
+                element.SendKeys(word);
+            }
+
             return true;
         }
+
 
         /// <summary>
         /// Executa o comando de enviar palavra secreta do properties utilizando a SendKeys Selenium com o By Locator
