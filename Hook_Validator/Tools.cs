@@ -1,6 +1,5 @@
-﻿/*
- * @author Eduardo Oliveira
- */
+﻿/* @author Eduardo Oliveira
+*/
 using Authlete.Util;
 using NUnit.Framework;
 using OpenQA.Selenium;
@@ -27,42 +26,26 @@ namespace Hook_Validator
         private const int TIMEOUT_DELAY = 200;
 
         private static string keyAttribute { get; set; }
+
         private static string byAttribute { get; set; }
+
         private static string valueAttribute { get; set; }
+
         private static string getCount { get; set; }
+
         private static int count { get; set; }
+
         private static string getCorrection { get; set; }
+
+        // 1. Extraia o diretório base para maior clareza
+        private static string baseDirectory = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName;
+
+        // 2. Use Path.Combine() para juntar o diretório base com o nome do arquivo/subdiretório
+        private static string filePath = Path.Combine(baseDirectory, Hook.getPathReport);
+
+        private static string pathXml = Path.Combine(baseDirectory, Hook.getPathLocator);
         private static By newByValue { get; set; }
 
-        // CORREÇÃO: Métodos auxiliares para compatibilidade (ADICIONADOS, NÃO REMOVIDOS)
-        private static bool IsWindows()
-        {
-            return Environment.OSVersion.Platform == PlatformID.Win32NT;
-        }
-
-        private static string GetBaseDirectory()
-        {
-            // Mantém compatibilidade com o método original mas usa abordagem mais confiável
-            try
-            {
-                return Directory.GetCurrentDirectory();
-            }
-            catch
-            {
-                return System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName;
-            }
-        }
-
-        private static string NormalizePath(string path)
-        {
-            if (string.IsNullOrEmpty(path)) return path;
-            return path.Replace('\\', Path.DirectorySeparatorChar)
-                      .Replace('/', Path.DirectorySeparatorChar);
-        }
-
-        // CORREÇÃO: Caminhos universalizados (MANTIDOS os originais mas com compatibilidade)
-        private static string filePath => Path.Combine(GetBaseDirectory(), NormalizePath(Hook.getPathReport ?? ""));
-        private static string pathXml => Path.Combine(GetBaseDirectory(), NormalizePath(Hook.getPathLocator ?? ""));
 
         /// <summary>
         /// Navega para a página da url
@@ -213,7 +196,6 @@ namespace Hook_Validator
                 throw new TimeoutException("Implicit timeout error - " + e.Message);
             }
         }
-
         /// <summary>
         /// Executa o comando click utilizando o IWebElement
         /// </summary>
@@ -298,40 +280,39 @@ namespace Hook_Validator
 
             // Tabela com TODAS as teclas do Selenium
             Dictionary<string, string> specialKeys = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "Enter", Keys.Enter },
-                { "Tab", Keys.Tab },
-                { "Escape", Keys.Escape },
-                { "Space", Keys.Space },
-                { "Backspace", Keys.Backspace },
-                { "Delete", Keys.Delete },
-                { "Insert", Keys.Insert },
-                { "Home", Keys.Home },
-                { "End", Keys.End },
-                { "PageUp", Keys.PageUp },
-                { "PageDown", Keys.PageDown },
-                { "ArrowUp", Keys.ArrowUp },
-                { "ArrowDown", Keys.ArrowDown },
-                { "ArrowLeft", Keys.ArrowLeft },
-                { "ArrowRight", Keys.ArrowRight },
-                { "F1", Keys.F1 },
-                { "F2", Keys.F2 },
-                { "F3", Keys.F3 },
-                { "F4", Keys.F4 },
-                { "F5", Keys.F5 },
-                { "F6", Keys.F6 },
-                { "F7", Keys.F7 },
-                { "F8", Keys.F8 },
-                { "F9", Keys.F9 },
-                { "F10", Keys.F10 },
-                { "F11", Keys.F11 },
-                { "F12", Keys.F12 },
-                { "Ctrl", Keys.Control },
-                { "Control", Keys.Control },
-                { "Shift", Keys.Shift },
-                { "Alt", Keys.Alt }
-            };
-
+    {
+        { "Enter", Keys.Enter },
+        { "Tab", Keys.Tab },
+        { "Escape", Keys.Escape },
+        { "Space", Keys.Space },
+        { "Backspace", Keys.Backspace },
+        { "Delete", Keys.Delete },
+        { "Insert", Keys.Insert },
+        { "Home", Keys.Home },
+        { "End", Keys.End },
+        { "PageUp", Keys.PageUp },
+        { "PageDown", Keys.PageDown },
+        { "ArrowUp", Keys.ArrowUp },
+        { "ArrowDown", Keys.ArrowDown },
+        { "ArrowLeft", Keys.ArrowLeft },
+        { "ArrowRight", Keys.ArrowRight },
+        { "F1", Keys.F1 },
+        { "F2", Keys.F2 },
+        { "F3", Keys.F3 },
+        { "F4", Keys.F4 },
+        { "F5", Keys.F5 },
+        { "F6", Keys.F6 },
+        { "F7", Keys.F7 },
+        { "F8", Keys.F8 },
+        { "F9", Keys.F9 },
+        { "F10", Keys.F10 },
+        { "F11", Keys.F11 },
+        { "F12", Keys.F12 },
+        { "Ctrl", Keys.Control },
+        { "Control", Keys.Control },
+        { "Shift", Keys.Shift },
+        { "Alt", Keys.Alt }
+    };
             //Combinações: Ctrl+A / Shift+Tab / etc
             if (word.Contains("+"))
             {
@@ -366,40 +347,39 @@ namespace Hook_Validator
             ValidateElementVisible(element);
 
             Dictionary<string, string> specialKeys = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { "Enter", Keys.Enter },
-                { "Tab", Keys.Tab },
-                { "Escape", Keys.Escape },
-                { "Space", Keys.Space },
-                { "Backspace", Keys.Backspace },
-                { "Delete", Keys.Delete },
-                { "Insert", Keys.Insert },
-                { "Home", Keys.Home },
-                { "End", Keys.End },
-                { "PageUp", Keys.PageUp },
-                { "PageDown", Keys.PageDown },
-                { "ArrowUp", Keys.ArrowUp },
-                { "ArrowDown", Keys.ArrowDown },
-                { "ArrowLeft", Keys.ArrowLeft },
-                { "ArrowRight", Keys.ArrowRight },
-                { "F1", Keys.F1 },
-                { "F2", Keys.F2 },
-                { "F3", Keys.F3 },
-                { "F4", Keys.F4 },
-                { "F5", Keys.F5 },
-                { "F6", Keys.F6 },
-                { "F7", Keys.F7 },
-                { "F8", Keys.F8 },
-                { "F9", Keys.F9 },
-                { "F10", Keys.F10 },
-                { "F11", Keys.F11 },
-                { "F12", Keys.F12 },
-                { "Ctrl", Keys.Control },
-                { "Control", Keys.Control },
-                { "Shift", Keys.Shift },
-                { "Alt", Keys.Alt }
-            };
-
+    {
+        { "Enter", Keys.Enter },
+        { "Tab", Keys.Tab },
+        { "Escape", Keys.Escape },
+        { "Space", Keys.Space },
+        { "Backspace", Keys.Backspace },
+        { "Delete", Keys.Delete },
+        { "Insert", Keys.Insert },
+        { "Home", Keys.Home },
+        { "End", Keys.End },
+        { "PageUp", Keys.PageUp },
+        { "PageDown", Keys.PageDown },
+        { "ArrowUp", Keys.ArrowUp },
+        { "ArrowDown", Keys.ArrowDown },
+        { "ArrowLeft", Keys.ArrowLeft },
+        { "ArrowRight", Keys.ArrowRight },
+        { "F1", Keys.F1 },
+        { "F2", Keys.F2 },
+        { "F3", Keys.F3 },
+        { "F4", Keys.F4 },
+        { "F5", Keys.F5 },
+        { "F6", Keys.F6 },
+        { "F7", Keys.F7 },
+        { "F8", Keys.F8 },
+        { "F9", Keys.F9 },
+        { "F10", Keys.F10 },
+        { "F11", Keys.F11 },
+        { "F12", Keys.F12 },
+        { "Ctrl", Keys.Control },
+        { "Control", Keys.Control },
+        { "Shift", Keys.Shift },
+        { "Alt", Keys.Alt }
+    };
             if (word.Contains("+"))
             {
                 string[] keys = word.Split('+');
@@ -425,6 +405,7 @@ namespace Hook_Validator
 
             return true;
         }
+
 
         /// <summary>
         /// Executa o comando de enviar palavra secreta do properties utilizando a SendKeys Selenium com o By Locator
@@ -751,6 +732,7 @@ namespace Hook_Validator
             string valueText = element.GetAttribute("value");
             return valueText;
         }
+
 
         /// <summary>
         /// Valida se o elemento existe e esteja visivel 
@@ -1178,21 +1160,16 @@ namespace Hook_Validator
         /// </summary>
         public static string Screenshot()
         {
-            // CORREÇÃO: Usar Path.Combine para compatibilidade
-            string reportDir = Path.Combine(GetBaseDirectory(), NormalizePath(Hook.getPathReport ?? ""));
-            Directory.CreateDirectory(reportDir);
-
             string strLog = "Erro";
-            string filePathPng = Path.Combine(reportDir, strLog + ".PNG");
+            string filePathPng = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + Hook.getPathReport + strLog + ".PNG";
             bool existe = false;
-
             while (File.Exists(filePathPng))
             {
                 existe = true;
                 writeFileTxt();
                 readFileTxt();
                 string fileCount = string.Format("{0}({1})", strLog, getCount);
-                filePathPng = Path.Combine(reportDir, fileCount + ".PNG");
+                filePathPng = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + Hook.getPathReport + fileCount + ".PNG";
                 ((ITakesScreenshot)Selenium.driver).GetScreenshot().SaveAsFile(filePathPng, ScreenshotImageFormat.Png);
                 break;
             }
@@ -1216,20 +1193,16 @@ namespace Hook_Validator
         /// </summary>
         public static void createTemplate(string folderName)
         {
-            // CORREÇÃO: Usar métodos compatíveis
             var solutionName = Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
             string splitName = solutionName.Split('.')[0];
-            string baseDir = GetBaseDirectory();
-            string filename = Path.Combine(baseDir, splitName + ".csproj");
-            string createFolder = baseDir + Path.DirectorySeparatorChar;
-
+            string filename = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + @"\" + splitName + ".csproj";
+            string createFolder = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + @"\";
             XmlDocument doc = new XmlDocument();
             doc.Load(filename);
             XmlDocumentFragment docFrag = doc.CreateDocumentFragment();
             docFrag.InnerXml = "<ItemGroup> </ItemGroup>";
             doc.DocumentElement.AppendChild(docFrag);
             XmlNodeList nosItemGroup = doc.GetElementsByTagName("ItemGroup");
-
             foreach (XmlNode no in nosItemGroup)
             {
                 if (no.FirstChild.Name == "#whitespace")
@@ -1241,19 +1214,17 @@ namespace Hook_Validator
                     folders.Add("_Resources");
                     folders.Add("_Features");
                     folders.Add("_Steps");
-
                     foreach (string item in folders)
                     {
                         XmlNode newNo = doc.CreateElement("Folder", no.NamespaceURI);
                         XmlAttribute newAttrib = doc.CreateAttribute("Include");
-                        newAttrib.Value = folderName + item + Path.DirectorySeparatorChar;
+                        newAttrib.Value = "" + folderName + item + "\\";
                         newNo.Attributes.Append(newAttrib);
                         no.AppendChild(newNo);
-                        Directory.CreateDirectory(Path.Combine(createFolder, folderName + item));
+                        Directory.CreateDirectory(createFolder + folderName + item);
                     }
                 }
             }
-
             doc.Save(filename);
             List<string> listCsproj = File.ReadAllLines(filename).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
             List<string> replaceOutputType = listCsproj.Select(x => x.Replace("WinExe", "Library")).ToList();
@@ -1403,37 +1374,24 @@ namespace Hook_Validator
         public static By GetLocator(string locator)
         {
             string featureName = FeatureContext.Current.FeatureInfo.Title;
-
-            // CORREÇÃO: Verificar se diretório existe
-            if (!Directory.Exists(pathXml))
-            {
-                Directory.CreateDirectory(pathXml);
-            }
-
             foreach (string xmlName in Directory.GetFiles(pathXml, "*.xml", SearchOption.TopDirectoryOnly)
-                .Select(Path.GetFileName)
+                .Select(Path
+                .GetFileName)
                 .ToArray())
             {
                 List<XmlNode> xmlNodeList = new List<XmlNode>();
                 string[] filePaths = Directory.GetFiles(pathXml);
-
                 for (int i = 0, j = filePaths.Length; i < j; i++)
                 {
                     XmlDocument doc = new XmlDocument();
                     doc.Load(filePaths[i]);
                     XmlNode rootNode = doc.SelectSingleNode("locators");
-
-                    if (rootNode != null)
-                    {
-                        foreach (XmlNode node in rootNode.SelectNodes("element"))
-                            xmlNodeList.Add(node);
-                    }
+                    foreach (XmlNode node in rootNode.SelectNodes("element"))
+                        xmlNodeList.Add(node);
                 }
-
                 keyAttribute = null;
                 valueAttribute = null;
                 byAttribute = null;
-
                 foreach (XmlNode node in xmlNodeList)
                 {
                     var teste = node.Attributes["key"].Value.ToString().Trim();
@@ -1446,10 +1404,10 @@ namespace Hook_Validator
                     }
                 }
             }
-
             By b = null;
             if (valueAttribute != null)
             {
+
                 switch (byAttribute)
                 {
                     case "id":
@@ -1477,7 +1435,6 @@ namespace Hook_Validator
                         break;
                 }
             }
-
             try
             {
                 IWebElement element = Selenium.driver.FindElement(b);
@@ -1488,7 +1445,6 @@ namespace Hook_Validator
             {
                 IntelligentUpdateXml(locator);
             }
-
             if (b == null) throw new NotFoundException("Não foi localizado o locator ( " + locator + " )");
             b = newByValue;
             return b;
@@ -1502,18 +1458,16 @@ namespace Hook_Validator
         private static void IntelligentUpdateXml(string locator, IWebElement element)
         {
             foreach (string xmlName in Directory.GetFiles(pathXml, "*.xml", SearchOption.TopDirectoryOnly)
-                .Select(Path.GetFileName)
+                .Select(Path
+                .GetFileName)
                 .ToArray())
             {
-                // CORREÇÃO: Usar Path.Combine
-                string xmlPath = Path.Combine(pathXml, xmlName);
                 XmlDocument xml = new XmlDocument();
-                xml.Load(xmlPath);
+                xml.Load(pathXml + xmlName);
                 XmlNode root = xml.DocumentElement;
                 IEnumerator ie = root.SelectNodes("element").GetEnumerator();
                 string byActual = null;
                 string valueActual = null;
-
                 while (ie.MoveNext())
                 {
                     if ((ie.Current as XmlNode).Attributes["key"].Value == locator)
@@ -1530,8 +1484,7 @@ namespace Hook_Validator
                         }
                     }
                 }
-
-                xml.Save(xmlPath);
+                xml.Save(pathXml + xmlName);
                 GetCurrentTab();
                 string idElement = getElementId();
                 // string cssElement = getElementCssSelector();
@@ -1550,12 +1503,10 @@ namespace Hook_Validator
                     value = idElement;
                     newByValue = By.Id(value);
                 }
-
                 XmlDocument xmlUpdate = new XmlDocument();
-                xmlUpdate.Load(xmlPath);
+                xmlUpdate.Load(pathXml + xmlName);
                 XmlNode roott = xmlUpdate.DocumentElement;
                 IEnumerator iee = roott.SelectNodes("element").GetEnumerator();
-
                 while (iee.MoveNext())
                 {
                     if ((iee.Current as XmlNode).Attributes["key"].Value == locator)
@@ -1565,16 +1516,15 @@ namespace Hook_Validator
                         (iee.Current as XmlNode).Attributes["baseValue"].Value = getCorrection;
                     }
                 }
-
-                xmlUpdate.Save(xmlPath);
-                List<string> list = File.ReadAllLines(xmlPath).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
+                xmlUpdate.Save(pathXml + xmlName);
+                List<string> list = File.ReadAllLines(pathXml + xmlName).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
                 List<string> listReplace = list.Select(x => x.Replace("&gt;", ">")
                 .Replace("&lt", "<")
                 .Replace("&apos;", "'")
                 .Replace("&quot;", "\"")
                 .Replace("&amp;", "&"))
                     .ToList();
-                File.WriteAllLines(xmlPath, listReplace);
+                File.WriteAllLines(pathXml + xmlName, listReplace);
             }
         }
 
@@ -1586,16 +1536,14 @@ namespace Hook_Validator
         private static void IntelligentUpdateXml(string locator)
         {
             foreach (string xmlName in Directory.GetFiles(pathXml, "*.xml", SearchOption.TopDirectoryOnly)
-                .Select(Path.GetFileName)
-                .ToArray())
+              .Select(Path
+              .GetFileName)
+              .ToArray())
             {
-                // CORREÇÃO: Usar Path.Combine
-                string xmlPath = Path.Combine(pathXml, xmlName);
                 XmlDocument xml = new XmlDocument();
-                xml.Load(xmlPath);
+                xml.Load(pathXml + xmlName);
                 XmlNode root = xml.DocumentElement;
                 IEnumerator ie = root.SelectNodes("element").GetEnumerator();
-
                 while (ie.MoveNext())
                 {
                     if ((ie.Current as XmlNode).Attributes["key"].Value == locator)
@@ -1603,8 +1551,7 @@ namespace Hook_Validator
                         getCorrection = (ie.Current as XmlNode).Attributes["baseValue"].Value;
                     }
                 }
-
-                xml.Save(xmlPath);
+                xml.Save(pathXml + xmlName);
                 GetCurrentTab();
                 string idElement = getElementId();
                 // string cssElement = getElementCssSelector();
@@ -1623,12 +1570,10 @@ namespace Hook_Validator
                     value = idElement;
                     newByValue = By.Id(value);
                 }
-
                 XmlDocument xmlUpdate = new XmlDocument();
-                xmlUpdate.Load(xmlPath);
+                xmlUpdate.Load(pathXml + xmlName);
                 XmlNode roott = xmlUpdate.DocumentElement;
                 IEnumerator iee = roott.SelectNodes("element").GetEnumerator();
-
                 while (iee.MoveNext())
                 {
                     if ((iee.Current as XmlNode).Attributes["key"].Value == locator)
@@ -1637,16 +1582,15 @@ namespace Hook_Validator
                         (iee.Current as XmlNode).Attributes["value"].Value = value;
                     }
                 }
-
-                xmlUpdate.Save(xmlPath);
-                List<string> list = File.ReadAllLines(xmlPath).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
+                xmlUpdate.Save(pathXml + xmlName);
+                List<string> list = File.ReadAllLines(pathXml + xmlName).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
                 List<string> listReplace = list.Select(x => x.Replace("&gt;", ">")
                 .Replace("&lt", "<")
                 .Replace("&apos;", "'")
                 .Replace("&quot;", "\"")
                 .Replace("&amp;", "&"))
                     .ToList();
-                File.WriteAllLines(xmlPath, listReplace);
+                File.WriteAllLines(pathXml + xmlName, listReplace);
             }
         }
 
@@ -1865,6 +1809,7 @@ return css;
             return _result;
         }
 
+
         private static string QuoteLocator(string locator)
         {
             locator = locator.Replace("\\", "").Replace("\"", "'").Replace("''", "'").Trim('\'');
@@ -1876,21 +1821,17 @@ return css;
 
         public static void Encrypt()
         {
-            string filePath = GetBaseDirectory();
+            string filePath = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName;
             string currentDirectory = Environment.CurrentDirectory;
             string[] directories = System.IO.Directory.GetFiles(filePath, "*", SearchOption.AllDirectories);
             var teste = directories.Where(x => x.EndsWith("properties") || x.EndsWith("propertie") || x.EndsWith("propriedades"));
             string file = null;
             foreach (string directory in teste) { file = directory; break; }
-
-            if (file == null) return;
-
             IDictionary<string, string> properties;
             using (TextReader reader = new StreamReader(file))
             {
                 properties = PropertiesLoader.Load(reader);
             }
-
             string key = "E546C8DF278CD5931069B522E695D4F2";
             using (FileStream fs = new FileStream(file, FileMode.OpenOrCreate))
             {
@@ -1907,21 +1848,17 @@ return css;
 
         public static void Decrypt()
         {
-            string filePath = GetBaseDirectory();
+            string filePath = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName;
             string currentDirectory = Environment.CurrentDirectory;
             string[] directories = System.IO.Directory.GetFiles(filePath, "*", SearchOption.AllDirectories);
             var teste = directories.Where(x => x.EndsWith("properties") || x.EndsWith("propertie") || x.EndsWith("propriedades"));
             string file = null;
             foreach (string directory in teste) { file = directory; break; }
-
-            if (file == null) return;
-
             IDictionary<string, string> properties;
             using (TextReader reader = new StreamReader(file))
             {
                 properties = PropertiesLoader.Load(reader);
             }
-
             string key = "E546C8DF278CD5931069B522E695D4F2";
             using (FileStream fs = new FileStream(file, FileMode.OpenOrCreate))
             {
@@ -1934,7 +1871,6 @@ return css;
                         tw.WriteLine(format);
                     }
             }
-
             List<string> list = System.IO.File.ReadAllLines(file).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
             list.RemoveAll(x => x.EndsWith("=") || x.Contains("+"));
             System.IO.File.WriteAllLines(file, list);
@@ -1988,21 +1924,17 @@ decryptor, CryptoStreamMode.Read))
 
         public static string stringSecret(string value)
         {
-            string filePath = GetBaseDirectory();
+            string filePath = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName;
             string currentDirectory = Environment.CurrentDirectory;
             string[] directories = System.IO.Directory.GetFiles(filePath, "*", SearchOption.AllDirectories);
             var teste = directories.Where(x => x.EndsWith("properties") || x.EndsWith("propertie") || x.EndsWith("propriedades"));
             string file = null;
             foreach (string directory in teste) { file = directory; break; }
-
-            if (file == null) return value;
-
             IDictionary<string, string> properties;
             using (TextReader reader = new StreamReader(file))
             {
                 properties = PropertiesLoader.Load(reader);
             }
-
             string key = "E546C8DF278CD5931069B522E695D4F2";
             foreach (KeyValuePair<string, string> kvp in properties)
             {
@@ -2162,7 +2094,7 @@ decryptor, CryptoStreamMode.Read))
 
         private static void SelfCorrectionParameters(string beforeError, string updateNewValue)
         {
-            string filePath = GetBaseDirectory();
+            string filePath = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName;
             string currentDirectory = Environment.CurrentDirectory;
             string[] directories = System.IO.Directory.GetFiles(filePath, "*", SearchOption.AllDirectories);
             foreach (string file in directories)
@@ -2193,12 +2125,9 @@ decryptor, CryptoStreamMode.Read))
             }
         }
 
-        // MÉTODOS ORIGINAIS MANTIDOS - CORREÇÃO APENAS NO CAMINHO
         private static void writeFileTxt()
         {
-            // CORREÇÃO: Usar Path.Combine para compatibilidade
-            string countFilePath = Path.Combine(filePath, "CountPng.txt");
-            using (StreamWriter save = new StreamWriter(countFilePath))
+            using (StreamWriter save = new StreamWriter(filePath + @"\CountPng.txt"))
             {
                 if (string.IsNullOrEmpty(getCount))
                 {
@@ -2218,9 +2147,7 @@ decryptor, CryptoStreamMode.Read))
 
         private static void readFileTxt()
         {
-            // CORREÇÃO: Usar Path.Combine para compatibilidade
-            string countFilePath = Path.Combine(filePath, "CountPng.txt");
-            using (StreamReader load = new StreamReader(countFilePath))
+            using (StreamReader load = new StreamReader(filePath + @"\CountPng.txt"))
             {
                 getCount = load.ReadLine();
             }

@@ -1,5 +1,4 @@
-﻿/*
- * @author Eduardo Oliveira
+﻿/* @author Eduardo Oliveira
  */
 using AventStack.ExtentReports;
 using AventStack.ExtentReports.Gherkin.Model;
@@ -29,6 +28,7 @@ namespace Hook_Validator
         public static string getPathLocator { get; set; }
         public static ConcurrentDictionary<string, ExtentTest> FeatureDictionary = new ConcurrentDictionary<string, ExtentTest>();
 
+
         /// <summary>
         ///  Preparação do relatório e especificação dos caminhos das pastas
         ///  do Report e do Locators
@@ -38,96 +38,56 @@ namespace Hook_Validator
         [BeforeTestRun]
         public static void BeforeTestRun(string pathReport, string pathLocators)
         {
-            // CORREÇÃO: Usar Path.DirectorySeparatorChar para ser compatível com Windows e Linux
-            string directorySeparator = Path.DirectorySeparatorChar.ToString();
-            pathReport = directorySeparator + pathReport + directorySeparator;
-            pathLocators = directorySeparator + pathLocators + directorySeparator;
+            // OBTENÇÃO DO DIRETÓRIO BASE (Mantido)
+            // Esta lógica complexa obtém o diretório raiz do projeto.
+            string baseDirectory = System.IO.Directory.GetParent(
+                System.IO.Directory.GetParent(
+                    System.IO.Directory.GetParent(
+                        Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+                    ).FullName
+                ).FullName
+            ).FullName;
 
-            // CORREÇÃO: Usar Directory.GetCurrentDirectory() em vez de Assembly.Location
-            string baseDirectory = Directory.GetCurrentDirectory();
-            string filePathReport = Path.Combine(baseDirectory, pathReport.TrimStart(Path.DirectorySeparatorChar));
-            string filePathLocators = Path.Combine(baseDirectory, pathLocators.TrimStart(Path.DirectorySeparatorChar));
+            // AJUSTE CRÍTICO: Uso de Path.Combine() para criar caminhos multiplataforma.
+            // As linhas originais 41 e 42 foram REMOVIDAS, pois forçavam o separador '\'.
+            string filePathReport = Path.Combine(baseDirectory, pathReport);
+            string filePathLocators = Path.Combine(baseDirectory, pathLocators);
 
-            // CORREÇÃO: Criar diretório se não existir
+            // AJUSTE: Criação do diretório usando o caminho ABSOLUTO (filePathReport)
+            // O código original usava o caminho relativo (pathReport), o que poderia falhar.
             Directory.CreateDirectory(filePathReport);
-            Directory.CreateDirectory(filePathLocators);
 
-            // Limpar arquivos antigos apenas se o diretório existir
-            if (Directory.Exists(filePathReport))
-            {
-                try
-                {
-                    var filesToDelete = Directory.GetFiles(filePathReport)
-                        .Where(file => file.EndsWith(".txt") || file.EndsWith(".PNG") || file.EndsWith(".html"))
-                        .ToList();
+            // Limpeza de arquivos antigos (mantido, mas usando o caminho ABSOLUTO)
+            new List<string>(Directory.GetFiles(filePathReport)).ForEach(file => { if (file.EndsWith(".txt") || file.EndsWith(".PNG") || file.EndsWith(".html")) File.Delete(file); });
 
-                    foreach (var file in filesToDelete)
-                    {
-                        try
-                        {
-                            File.Delete(file);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Não foi possível deletar {file}: {ex.Message}");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Erro ao limpar arquivos: {ex.Message}");
-                }
-            }
-
+            // Armazenamento dos nomes dos diretórios (mantido)
             getPathReport = pathReport;
             getPathLocator = pathLocators;
 
+            // Configuração do Extent Report (mantido)
             var htmlReport = new ExtentHtmlReporter(filePathReport);
             htmlReport.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Dark;
             extent = new AventStack.ExtentReports.ExtentReports();
             extent.AttachReporter(htmlReport);
 
-            // CORREÇÃO: Matar processos de driver de forma compatível
-            foreach (var processName in new[] { "chromedriver", "msedgedriver", "geckodriver", "chromedriver.exe", "msedgedriver.exe", "geckodriver.exe" })
+            // este trecho deleta os folders dos browsers vindo do webmanager (Mantido)
+            foreach (var processName in new[] { "chromedriver", "msedgedriver", "geckodriver" })
             {
-                try
+                foreach (var process in Process.GetProcessesByName(processName))
                 {
-                    foreach (var process in Process.GetProcessesByName(processName.Replace(".exe", "")))
-                    {
-                        try
-                        {
-                            process.Kill();
-                            process.WaitForExit(5000);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Erro ao matar processo {processName}: {ex.Message}");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Erro ao acessar processos {processName}: {ex.Message}");
+                    process.Kill();
+                    process.WaitForExit();
                 }
             }
-
-            // CORREÇÃO: Deletar pastas de browsers de forma segura
             string[] browserFolders = { "Chrome", "Edge", "Firefox" };
             string baseFolderPath = AppDomain.CurrentDomain.BaseDirectory;
-
             foreach (var browserFolder in browserFolders)
             {
                 string browserFolderPath = Path.Combine(baseFolderPath, browserFolder);
+
                 if (Directory.Exists(browserFolderPath))
                 {
-                    try
-                    {
-                        Directory.Delete(browserFolderPath, true);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Não foi possível deletar {browserFolderPath}: {ex.Message}");
-                    }
+                    Directory.Delete(browserFolderPath, true);
                 }
             }
         }
@@ -140,7 +100,7 @@ namespace Hook_Validator
         [AfterTestRun]
         public static void AfterTestRun()
         {
-            extent?.Flush();
+            extent.Flush();
         }
 
         /// <summary>
@@ -185,6 +145,7 @@ namespace Hook_Validator
         {
             Selenium.TearDown();
         }
+
 
         /// <summary>
         ///  São comportamentos de cada step seja positivo ou negativo
@@ -273,87 +234,54 @@ namespace Hook_Validator
 
         internal static void SelectBrowser(string browserType, string headless, string device)
         {
-            // Configurações base para todos os navegadores
-            var baseArguments = new List<string>
-            {
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-blink-features=AutomationControlled"
-            };
-
-            // No Linux, sempre adicionar headless e outras opções específicas
-            if (!IsWindows())
-            {
-                baseArguments.Add("--headless=new");
-                baseArguments.Add("--disable-gpu");
-                baseArguments.Add("--remote-debugging-port=9222");
-                baseArguments.Add("--window-size=1920,1080");
-            }
-            else if (!string.IsNullOrEmpty(headless) && headless.Equals("--headless"))
-            {
-                // No Windows, só adicionar headless se especificado
-                baseArguments.Add("--headless=new");
-            }
-
             switch (browserType)
             {
                 case "Chrome":
                     new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
-                    var chromeOptions = new ChromeOptions();
-                    chromeOptions.AddArguments(baseArguments);
-
-                    if (!string.IsNullOrEmpty(device))
-                        chromeOptions.EnableMobileEmulation(device);
-
-                    // CORREÇÃO: Não passar o caminho do driver - WebDriverManager já configura isso
-                    Selenium.driver = new ChromeDriver(chromeOptions);
+                    ChromeOptions optionChrome = new ChromeOptions();
+                    optionChrome.AddArgument(headless);
+                    optionChrome.EnableMobileEmulation(device);
+                    Selenium.driver = new ChromeDriver(GetChromeDriver(), optionChrome);
+                    Selenium.driver.Manage().Window.Maximize();
                     break;
-
                 case "Edge":
                     new WebDriverManager.DriverManager().SetUpDriver(new EdgeConfig());
-                    var edgeOptions = new EdgeOptions();
-                    edgeOptions.AddArguments(baseArguments);
-
-                    if (!string.IsNullOrEmpty(device))
-                        edgeOptions.EnableMobileEmulation(device);
-
-                    Selenium.driver = new EdgeDriver(edgeOptions);
+                    EdgeOptions optionEdge = new EdgeOptions();
+                    optionEdge.AddArgument(headless);
+                    optionEdge.EnableMobileEmulation(device);
+                    Selenium.driver = new EdgeDriver(GetEdgeDriver(), optionEdge);
+                    Selenium.driver.Manage().Window.Maximize();
                     break;
-
                 case "Firefox":
                     new WebDriverManager.DriverManager().SetUpDriver(new FirefoxConfig());
-                    var firefoxOptions = new FirefoxOptions();
-
-                    // Configuração específica para Firefox
-                    if (!IsWindows() || (!string.IsNullOrEmpty(headless) && headless.Equals("--headless")))
-                        firefoxOptions.AddArgument("--headless");
-
-                    // Configurações de performance
-                    firefoxOptions.SetPreference("browser.download.folderList", 2);
-                    firefoxOptions.SetPreference("browser.download.manager.showWhenStarting", false);
-                    firefoxOptions.SetPreference("browser.download.dir", Path.GetTempPath());
-
-                    Selenium.driver = new FirefoxDriver(firefoxOptions);
+                    FirefoxOptions optionFirefox = new FirefoxOptions();
+                    if (headless.Equals("--headless"))
+                    {
+                        optionFirefox.AddArgument(headless);
+                        Selenium.driver = new FirefoxDriver(GetFirefoxDriver(), optionFirefox);
+                    }
+                    else
+                    {
+                        Selenium.driver = new FirefoxDriver(GetFirefoxDriver());
+                    }
+                    Selenium.driver.Manage().Window.Maximize();
                     break;
             }
-
-            Selenium.driver.Manage().Window.Maximize();
         }
 
-        // CORREÇÃO: Método para detectar o sistema operacional
-        private static bool IsWindows()
+        private static string GetChromeDriver()
         {
-            return Environment.OSVersion.Platform == PlatformID.Win32NT;
+            return new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
         }
 
-        // REMOÇÃO: Os métodos GetChromeDriver, GetEdgeDriver e GetFirefoxDriver foram removidos
-        // pois o WebDriverManager já cuida automaticamente do caminho dos drivers
-
-        enum BrowserType
+        private static string GetEdgeDriver()
         {
-            Chrome,
-            Firefox,
-            Edge
+            return new WebDriverManager.DriverManager().SetUpDriver(new EdgeConfig());
+        }
+
+        private static string GetFirefoxDriver()
+        {
+            return new WebDriverManager.DriverManager().SetUpDriver(new FirefoxConfig());
         }
     }
 }
