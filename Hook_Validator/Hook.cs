@@ -166,9 +166,9 @@ namespace Hook_Validator
         /// <param name="headless">Modo invisível</param>
         /// <param name="device">Modo mobile apenas especificar o modelo mobile</param>
         [BeforeScenario]
-        public static void BeforeScenario(string browser, string arg, string device)
+        public static void BeforeScenario(string browser, string headless, string device)
         {
-            SelectBrowser(browser, arg, device);
+            SelectBrowser(browser, headless, device);
             string InBSName = FeatureContext.Current.FeatureInfo.Title;
             if (FeatureDictionary.ContainsKey(InBSName))
             {
@@ -257,6 +257,7 @@ namespace Hook_Validator
                 }
             }
         }
+
         private static string ConvertFilePathToBase64(string filePath)
         {
             byte[] imageArray = File.ReadAllBytes(filePath);
@@ -272,104 +273,71 @@ namespace Hook_Validator
 
         internal static void SelectBrowser(string browserType, string headless, string device)
         {
+            // Configurações base para todos os navegadores
+            var baseArguments = new List<string>
+            {
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-blink-features=AutomationControlled"
+            };
+
+            // No Linux, sempre adicionar headless e outras opções específicas
+            if (!IsWindows())
+            {
+                baseArguments.Add("--headless=new");
+                baseArguments.Add("--disable-gpu");
+                baseArguments.Add("--remote-debugging-port=9222");
+                baseArguments.Add("--window-size=1920,1080");
+            }
+            else if (!string.IsNullOrEmpty(headless) && headless.Equals("--headless"))
+            {
+                // No Windows, só adicionar headless se especificado
+                baseArguments.Add("--headless=new");
+            }
+
             switch (browserType)
             {
                 case "Chrome":
                     new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
-                    ChromeOptions optionChrome = new ChromeOptions();
-                    optionChrome.AddArgument(headless);
-                    optionChrome.EnableMobileEmulation(device);
-                    Selenium.driver = new ChromeDriver(GetChromeDriver(), optionChrome);
-                    Selenium.driver.Manage().Window.Maximize();
+                    var chromeOptions = new ChromeOptions();
+                    chromeOptions.AddArguments(baseArguments);
+
+                    if (!string.IsNullOrEmpty(device))
+                        chromeOptions.EnableMobileEmulation(device);
+
+                    // CORREÇÃO: Não passar o caminho do driver - WebDriverManager já configura isso
+                    Selenium.driver = new ChromeDriver(chromeOptions);
                     break;
+
                 case "Edge":
                     new WebDriverManager.DriverManager().SetUpDriver(new EdgeConfig());
-                    EdgeOptions optionEdge = new EdgeOptions();
-                    optionEdge.AddArgument(headless);
-                    optionEdge.EnableMobileEmulation(device);
-                    Selenium.driver = new EdgeDriver(GetEdgeDriver(), optionEdge);
-                    Selenium.driver.Manage().Window.Maximize();
+                    var edgeOptions = new EdgeOptions();
+                    edgeOptions.AddArguments(baseArguments);
+
+                    if (!string.IsNullOrEmpty(device))
+                        edgeOptions.EnableMobileEmulation(device);
+
+                    Selenium.driver = new EdgeDriver(edgeOptions);
                     break;
+
                 case "Firefox":
                     new WebDriverManager.DriverManager().SetUpDriver(new FirefoxConfig());
-                    FirefoxOptions optionFirefox = new FirefoxOptions();
-                    if (headless.Equals("--headless"))
-                    {
-                        optionFirefox.AddArgument(headless);
-                        Selenium.driver = new FirefoxDriver(GetFirefoxDriver(), optionFirefox);
-                    }
-                    else
-                    {
-                        Selenium.driver = new FirefoxDriver(GetFirefoxDriver());
-                    }
-                    Selenium.driver.Manage().Window.Maximize();
+                    var firefoxOptions = new FirefoxOptions();
+
+                    // Configuração específica para Firefox
+                    if (!IsWindows() || (!string.IsNullOrEmpty(headless) && headless.Equals("--headless")))
+                        firefoxOptions.AddArgument("--headless");
+
+                    // Configurações de performance
+                    firefoxOptions.SetPreference("browser.download.folderList", 2);
+                    firefoxOptions.SetPreference("browser.download.manager.showWhenStarting", false);
+                    firefoxOptions.SetPreference("browser.download.dir", Path.GetTempPath());
+
+                    Selenium.driver = new FirefoxDriver(firefoxOptions);
                     break;
             }
-        }
 
-        // CORREÇÃO: Métodos para obter drivers de forma compatível com Windows e Linux
-        private static string GetChromeDriver()
-        {
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string folderChrome = Path.Combine(baseDirectory, "Chrome");
-
-            if (!Directory.Exists(folderChrome))
-                return baseDirectory;
-
-            try
-            {
-                string driverName = IsWindows() ? "chromedriver.exe" : "chromedriver";
-                var driverFile = Directory.GetFiles(folderChrome, driverName, SearchOption.AllDirectories)
-                    .FirstOrDefault();
-
-                return driverFile != null ? Path.GetDirectoryName(driverFile) : baseDirectory;
-            }
-            catch
-            {
-                return baseDirectory;
-            }
-        }
-        public static string GetEdgeDriver()
-        {
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string folderEdge = Path.Combine(baseDirectory, "Edge");
-
-            if (!Directory.Exists(folderEdge))
-                return baseDirectory;
-
-            try
-            {
-                string driverName = IsWindows() ? "msedgedriver.exe" : "msedgedriver";
-                var driverFile = Directory.GetFiles(folderEdge, driverName, SearchOption.AllDirectories)
-                    .FirstOrDefault();
-
-                return driverFile != null ? Path.GetDirectoryName(driverFile) : baseDirectory;
-            }
-            catch
-            {
-                return baseDirectory;
-            }
-        }
-        private static string GetFirefoxDriver()
-        {
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string folderFirefox = Path.Combine(baseDirectory, "Firefox");
-
-            if (!Directory.Exists(folderFirefox))
-                return baseDirectory;
-
-            try
-            {
-                string driverName = IsWindows() ? "geckodriver.exe" : "geckodriver";
-                var driverFile = Directory.GetFiles(folderFirefox, driverName, SearchOption.AllDirectories)
-                    .FirstOrDefault();
-
-                return driverFile != null ? Path.GetDirectoryName(driverFile) : baseDirectory;
-            }
-            catch
-            {
-                return baseDirectory;
-            }
+            Selenium.driver.Manage().Window.Maximize();
         }
 
         // CORREÇÃO: Método para detectar o sistema operacional
@@ -377,6 +345,10 @@ namespace Hook_Validator
         {
             return Environment.OSVersion.Platform == PlatformID.Win32NT;
         }
+
+        // REMOÇÃO: Os métodos GetChromeDriver, GetEdgeDriver e GetFirefoxDriver foram removidos
+        // pois o WebDriverManager já cuida automaticamente do caminho dos drivers
+
         enum BrowserType
         {
             Chrome,
