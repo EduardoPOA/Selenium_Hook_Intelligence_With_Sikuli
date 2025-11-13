@@ -29,7 +29,6 @@ namespace Hook_Validator
         public static string getPathLocator { get; set; }
         public static ConcurrentDictionary<string, ExtentTest> FeatureDictionary = new ConcurrentDictionary<string, ExtentTest>();
 
-
         /// <summary>
         ///  Preparação do relatório e especificação dos caminhos das pastas
         ///  do Report e do Locators
@@ -39,37 +38,96 @@ namespace Hook_Validator
         [BeforeTestRun]
         public static void BeforeTestRun(string pathReport, string pathLocators)
         {
-            pathReport = "\\" + pathReport + "\\";
-            pathLocators = "\\" + pathLocators + "\\";
-            string filePathReport = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + pathReport;
-            string filePathLocators = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + pathLocators;
-            new List<string>(Directory.GetFiles(filePathReport)).ForEach(file => { if (file.EndsWith(".txt") || file.EndsWith(".PNG") || file.EndsWith(".html")) File.Delete(file); });
+            // CORREÇÃO: Usar Path.DirectorySeparatorChar para ser compatível com Windows e Linux
+            string directorySeparator = Path.DirectorySeparatorChar.ToString();
+            pathReport = directorySeparator + pathReport + directorySeparator;
+            pathLocators = directorySeparator + pathLocators + directorySeparator;
+
+            // CORREÇÃO: Usar Directory.GetCurrentDirectory() em vez de Assembly.Location
+            string baseDirectory = Directory.GetCurrentDirectory();
+            string filePathReport = Path.Combine(baseDirectory, pathReport.TrimStart(Path.DirectorySeparatorChar));
+            string filePathLocators = Path.Combine(baseDirectory, pathLocators.TrimStart(Path.DirectorySeparatorChar));
+
+            // CORREÇÃO: Criar diretório se não existir
+            Directory.CreateDirectory(filePathReport);
+            Directory.CreateDirectory(filePathLocators);
+
+            // Limpar arquivos antigos apenas se o diretório existir
+            if (Directory.Exists(filePathReport))
+            {
+                try
+                {
+                    var filesToDelete = Directory.GetFiles(filePathReport)
+                        .Where(file => file.EndsWith(".txt") || file.EndsWith(".PNG") || file.EndsWith(".html"))
+                        .ToList();
+
+                    foreach (var file in filesToDelete)
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Não foi possível deletar {file}: {ex.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erro ao limpar arquivos: {ex.Message}");
+                }
+            }
+
             getPathReport = pathReport;
             getPathLocator = pathLocators;
-            Directory.CreateDirectory(pathReport);
+
             var htmlReport = new ExtentHtmlReporter(filePathReport);
             htmlReport.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Dark;
             extent = new AventStack.ExtentReports.ExtentReports();
             extent.AttachReporter(htmlReport);
 
-            //este trecho deleta os folders dos browsers vindo do webmanager
-            foreach (var processName in new[] { "chromedriver", "msedgedriver", "geckodriver" })
+            // CORREÇÃO: Matar processos de driver de forma compatível
+            foreach (var processName in new[] { "chromedriver", "msedgedriver", "geckodriver", "chromedriver.exe", "msedgedriver.exe", "geckodriver.exe" })
             {
-                foreach (var process in Process.GetProcessesByName(processName))
+                try
                 {
-                    process.Kill();
-                    process.WaitForExit();
+                    foreach (var process in Process.GetProcessesByName(processName.Replace(".exe", "")))
+                    {
+                        try
+                        {
+                            process.Kill();
+                            process.WaitForExit(5000);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Erro ao matar processo {processName}: {ex.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Erro ao acessar processos {processName}: {ex.Message}");
                 }
             }
+
+            // CORREÇÃO: Deletar pastas de browsers de forma segura
             string[] browserFolders = { "Chrome", "Edge", "Firefox" };
             string baseFolderPath = AppDomain.CurrentDomain.BaseDirectory;
+
             foreach (var browserFolder in browserFolders)
             {
                 string browserFolderPath = Path.Combine(baseFolderPath, browserFolder);
-
                 if (Directory.Exists(browserFolderPath))
                 {
-                    Directory.Delete(browserFolderPath, true);
+                    try
+                    {
+                        Directory.Delete(browserFolderPath, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Não foi possível deletar {browserFolderPath}: {ex.Message}");
+                    }
                 }
             }
         }
@@ -82,7 +140,7 @@ namespace Hook_Validator
         [AfterTestRun]
         public static void AfterTestRun()
         {
-            extent.Flush();
+            extent?.Flush();
         }
 
         /// <summary>
@@ -127,7 +185,6 @@ namespace Hook_Validator
         {
             Selenium.TearDown();
         }
-
 
         /// <summary>
         ///  São comportamentos de cada step seja positivo ou negativo
@@ -200,7 +257,6 @@ namespace Hook_Validator
                 }
             }
         }
-
         private static string ConvertFilePathToBase64(string filePath)
         {
             byte[] imageArray = File.ReadAllBytes(filePath);
@@ -251,41 +307,75 @@ namespace Hook_Validator
             }
         }
 
+        // CORREÇÃO: Métodos para obter drivers de forma compatível com Windows e Linux
         private static string GetChromeDriver()
         {
-            string fullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string theDirectory = Path.GetDirectoryName(fullPath);
-            string folderChrome = Path.Combine(theDirectory, "Chrome");
-            string[] directories = System.IO.Directory.GetDirectories(folderChrome, "*", System.IO.SearchOption.AllDirectories);
-            string[] directoriesFiles = System.IO.Directory.GetFiles(folderChrome, "*", System.IO.SearchOption.AllDirectories);
-            var driverEdge = directoriesFiles.Where(x => x.EndsWith("chromedriver.exe")).FirstOrDefault();
-            string driver = Convert.ToString(driverEdge);
-            driver = driver.Remove(driver.LastIndexOf('\\'));
-            return driver;
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string folderChrome = Path.Combine(baseDirectory, "Chrome");
+
+            if (!Directory.Exists(folderChrome))
+                return baseDirectory;
+
+            try
+            {
+                string driverName = IsWindows() ? "chromedriver.exe" : "chromedriver";
+                var driverFile = Directory.GetFiles(folderChrome, driverName, SearchOption.AllDirectories)
+                    .FirstOrDefault();
+
+                return driverFile != null ? Path.GetDirectoryName(driverFile) : baseDirectory;
+            }
+            catch
+            {
+                return baseDirectory;
+            }
         }
         public static string GetEdgeDriver()
         {
-            string fullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string theDirectory = Path.GetDirectoryName(fullPath);
-            string folderEdge = Path.Combine(theDirectory, "Edge");
-            string[] directories = System.IO.Directory.GetDirectories(folderEdge, "*", System.IO.SearchOption.AllDirectories);
-            string[] directoriesFiles = System.IO.Directory.GetFiles(folderEdge, "*", System.IO.SearchOption.AllDirectories);
-            var driverEdge = directoriesFiles.Where(x => x.EndsWith("msedgedriver.exe")).FirstOrDefault();
-            string driver = Convert.ToString(driverEdge);
-            driver = driver.Remove(driver.LastIndexOf('\\'));
-            return driver;
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string folderEdge = Path.Combine(baseDirectory, "Edge");
+
+            if (!Directory.Exists(folderEdge))
+                return baseDirectory;
+
+            try
+            {
+                string driverName = IsWindows() ? "msedgedriver.exe" : "msedgedriver";
+                var driverFile = Directory.GetFiles(folderEdge, driverName, SearchOption.AllDirectories)
+                    .FirstOrDefault();
+
+                return driverFile != null ? Path.GetDirectoryName(driverFile) : baseDirectory;
+            }
+            catch
+            {
+                return baseDirectory;
+            }
         }
         private static string GetFirefoxDriver()
         {
-            string fullPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string theDirectory = Path.GetDirectoryName(fullPath);
-            string folderChrome = Path.Combine(theDirectory, "Firefox");
-            string[] directories = System.IO.Directory.GetDirectories(folderChrome, "*", System.IO.SearchOption.AllDirectories);
-            string[] directoriesFiles = System.IO.Directory.GetFiles(folderChrome, "*", System.IO.SearchOption.AllDirectories);
-            var driverEdge = directoriesFiles.Where(x => x.EndsWith("geckodriver.exe")).FirstOrDefault();
-            string driver = Convert.ToString(driverEdge);
-            driver = driver.Remove(driver.LastIndexOf('\\'));
-            return driver;
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string folderFirefox = Path.Combine(baseDirectory, "Firefox");
+
+            if (!Directory.Exists(folderFirefox))
+                return baseDirectory;
+
+            try
+            {
+                string driverName = IsWindows() ? "geckodriver.exe" : "geckodriver";
+                var driverFile = Directory.GetFiles(folderFirefox, driverName, SearchOption.AllDirectories)
+                    .FirstOrDefault();
+
+                return driverFile != null ? Path.GetDirectoryName(driverFile) : baseDirectory;
+            }
+            catch
+            {
+                return baseDirectory;
+            }
+        }
+
+        // CORREÇÃO: Método para detectar o sistema operacional
+        private static bool IsWindows()
+        {
+            return Environment.OSVersion.Platform == PlatformID.Win32NT;
         }
         enum BrowserType
         {
@@ -295,4 +385,3 @@ namespace Hook_Validator
         }
     }
 }
-

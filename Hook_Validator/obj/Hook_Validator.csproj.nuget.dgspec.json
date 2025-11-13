@@ -5,7 +5,7 @@
   },
   "projects": {
     "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj": {
-      "version": "14.0.0",
+      "version": "15.0.0",
       "restore": {
         "projectUniqueName": "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
         "projectName": "Super_Automation_Sikuli",
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\bin\\Debug": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -66,6 +67,10 @@
               "target": "Package",
               "version": "[4.1.0, )"
             },
+            "Microsoft.NETCore.Platforms": {
+              "target": "Package",
+              "version": "[7.0.4, )"
+            },
             "Microsoft.Win32.Registry": {
               "target": "Package",
               "version": "[5.0.0, )"
@@ -79,6 +84,10 @@
             "NUnit": {
               "target": "Package",
               "version": "[3.13.3, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.4, )"
             },
             "Reqnroll": {
               "target": "Package",
