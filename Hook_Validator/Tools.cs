@@ -173,6 +173,21 @@ namespace Hook_Validator
         }
 
         /// <summary>
+        /// Seleciona o folder da Solution Explorer
+        /// </summary>
+        /// <param name="locator">Locator referente o elemento do arquivo xml</param>
+        public static string SelectFolderSolutionExplorer(string pathFolder)
+        {
+            pathFolder = Path.DirectorySeparatorChar + pathFolder + Path.DirectorySeparatorChar;
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string filePathReport = Path.Combine(baseDirectory, "..", "..", "..", pathFolder.TrimStart(Path.DirectorySeparatorChar));
+            filePathReport = Path.GetFullPath(filePathReport);
+            // Criar diretórios se não existirem
+            Directory.CreateDirectory(filePathReport);
+            return filePathReport;
+        }
+
+        /// <summary>
         /// Executa o comando click do Selenium
         /// </summary>
         /// <param name="locator">Locator referente o elemento do arquivo xml</param>
