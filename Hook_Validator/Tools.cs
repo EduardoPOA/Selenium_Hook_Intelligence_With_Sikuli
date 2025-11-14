@@ -1299,6 +1299,30 @@ namespace Hook_Validator
         }
 
         /// <summary>
+        ///  Método Action do Selenium para movimentar até o elemento sem clicar
+        /// </summary>
+        /// <param name="element">Elemento onde sera apenas ativado quando o action executar</param>
+        public static void ActionDragAndDrop(IWebElement element)
+        {
+            WaitElement(element);
+            Actions actions = new Actions(Selenium.driver);
+            actions.MoveToElement(element).Perform();
+        }
+
+        /// <summary>
+        ///  Método Action do Selenium para movimentar até o elemento sem clicar
+        /// </summary>
+        /// <param name="element">Elemento onde sera apenas ativado quando o action executar</param>
+        public static void ActionDragAndDrop(string locator, int timeout = TIMEOUT_CONST)
+        {
+            By byLocator = GetLocator(locator);
+            WebDriverWait wait = new WebDriverWait(Selenium.driver, TimeSpan.FromSeconds(timeout));
+            IWebElement element = wait.Until(ExpectedConditions.ElementIsVisible(byLocator));
+            Actions actions = new Actions(Selenium.driver);
+            actions.MoveToElement(element).Perform();
+        }
+
+        /// <summary>
         ///  Método Action do Selenium para arrastar o elemento e soltar no destino final
         /// </summary>
         /// <param name="elementInitial">Elemento inicial que deverá se mover para o final</param>
@@ -1665,7 +1689,7 @@ return xpath;
         private static string getElementId()
         {
             WebDriverWait wait = new WebDriverWait(Selenium.driver, TimeSpan.FromSeconds(15));
-            IWebElement webElement = wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(getCorrection)));
+            WebElement webElement = (WebElement)wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(getCorrection)));
             IJavaScriptExecutor jsExec = Selenium.driver as IJavaScriptExecutor;
             string _result = QuoteLocator((string)jsExec.ExecuteScript(
 @"
