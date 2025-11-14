@@ -37,13 +37,15 @@ namespace Hook_Validator
 
         private static string getCorrection { get; set; }
 
-        // 1. Extraia o diretório base para maior clareza
-        private static string baseDirectory = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName;
+        // Paths multiplataforma
+        private static string filePath = Path.GetFullPath(Path.Combine(
+            Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+            "..", "..", "..", Hook.getPathReport.TrimStart(Path.DirectorySeparatorChar)));
 
-        // 2. Use Path.Combine() para juntar o diretório base com o nome do arquivo/subdiretório
-        private static string filePath = Path.Combine(baseDirectory, Hook.getPathReport);
+        private static string pathXml = Path.GetFullPath(Path.Combine(
+            Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+            "..", "..", "..", Hook.getPathLocator.TrimStart(Path.DirectorySeparatorChar)));
 
-        private static string pathXml = Path.Combine(baseDirectory, Hook.getPathLocator);
         private static By newByValue { get; set; }
 
 
@@ -1161,15 +1163,19 @@ namespace Hook_Validator
         public static string Screenshot()
         {
             string strLog = "Erro";
-            string filePathPng = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + Hook.getPathReport + strLog + ".PNG";
+            string filePathPng = Path.Combine(filePath, strLog + ".PNG");
             bool existe = false;
+
+            // Garantir que o diretório existe
+            Directory.CreateDirectory(filePath);
+
             while (File.Exists(filePathPng))
             {
                 existe = true;
                 writeFileTxt();
                 readFileTxt();
                 string fileCount = string.Format("{0}({1})", strLog, getCount);
-                filePathPng = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + Hook.getPathReport + fileCount + ".PNG";
+                filePathPng = Path.Combine(filePath, fileCount + ".PNG");
                 ((ITakesScreenshot)Selenium.driver).GetScreenshot().SaveAsFile(filePathPng, ScreenshotImageFormat.Png);
                 break;
             }
@@ -1195,8 +1201,14 @@ namespace Hook_Validator
         {
             var solutionName = Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
             string splitName = solutionName.Split('.')[0];
-            string filename = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + @"\" + splitName + ".csproj";
-            string createFolder = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName + @"\";
+
+            // Path multiplataforma para o arquivo .csproj
+            string baseDir = Path.GetFullPath(Path.Combine(
+                Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+                "..", "..", ".."));
+            string filename = Path.Combine(baseDir, splitName + ".csproj");
+            string createFolder = baseDir + Path.DirectorySeparatorChar;
+
             XmlDocument doc = new XmlDocument();
             doc.Load(filename);
             XmlDocumentFragment docFrag = doc.CreateDocumentFragment();
@@ -1218,10 +1230,10 @@ namespace Hook_Validator
                     {
                         XmlNode newNo = doc.CreateElement("Folder", no.NamespaceURI);
                         XmlAttribute newAttrib = doc.CreateAttribute("Include");
-                        newAttrib.Value = "" + folderName + item + "\\";
+                        newAttrib.Value = "" + folderName + item + Path.DirectorySeparatorChar;
                         newNo.Attributes.Append(newAttrib);
                         no.AppendChild(newNo);
-                        Directory.CreateDirectory(createFolder + folderName + item);
+                        Directory.CreateDirectory(Path.Combine(createFolder, folderName + item));
                     }
                 }
             }
@@ -1374,6 +1386,10 @@ namespace Hook_Validator
         public static By GetLocator(string locator)
         {
             string featureName = FeatureContext.Current.FeatureInfo.Title;
+
+            // Garantir que o diretório existe
+            Directory.CreateDirectory(pathXml);
+
             foreach (string xmlName in Directory.GetFiles(pathXml, "*.xml", SearchOption.TopDirectoryOnly)
                 .Select(Path
                 .GetFileName)
@@ -1463,7 +1479,7 @@ namespace Hook_Validator
                 .ToArray())
             {
                 XmlDocument xml = new XmlDocument();
-                xml.Load(pathXml + xmlName);
+                xml.Load(Path.Combine(pathXml, xmlName));
                 XmlNode root = xml.DocumentElement;
                 IEnumerator ie = root.SelectNodes("element").GetEnumerator();
                 string byActual = null;
@@ -1484,7 +1500,7 @@ namespace Hook_Validator
                         }
                     }
                 }
-                xml.Save(pathXml + xmlName);
+                xml.Save(Path.Combine(pathXml, xmlName));
                 GetCurrentTab();
                 string idElement = getElementId();
                 // string cssElement = getElementCssSelector();
@@ -1504,7 +1520,7 @@ namespace Hook_Validator
                     newByValue = By.Id(value);
                 }
                 XmlDocument xmlUpdate = new XmlDocument();
-                xmlUpdate.Load(pathXml + xmlName);
+                xmlUpdate.Load(Path.Combine(pathXml, xmlName));
                 XmlNode roott = xmlUpdate.DocumentElement;
                 IEnumerator iee = roott.SelectNodes("element").GetEnumerator();
                 while (iee.MoveNext())
@@ -1516,15 +1532,15 @@ namespace Hook_Validator
                         (iee.Current as XmlNode).Attributes["baseValue"].Value = getCorrection;
                     }
                 }
-                xmlUpdate.Save(pathXml + xmlName);
-                List<string> list = File.ReadAllLines(pathXml + xmlName).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
+                xmlUpdate.Save(Path.Combine(pathXml, xmlName));
+                List<string> list = File.ReadAllLines(Path.Combine(pathXml, xmlName)).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
                 List<string> listReplace = list.Select(x => x.Replace("&gt;", ">")
                 .Replace("&lt", "<")
                 .Replace("&apos;", "'")
                 .Replace("&quot;", "\"")
                 .Replace("&amp;", "&"))
                     .ToList();
-                File.WriteAllLines(pathXml + xmlName, listReplace);
+                File.WriteAllLines(Path.Combine(pathXml, xmlName), listReplace);
             }
         }
 
@@ -1541,7 +1557,7 @@ namespace Hook_Validator
               .ToArray())
             {
                 XmlDocument xml = new XmlDocument();
-                xml.Load(pathXml + xmlName);
+                xml.Load(Path.Combine(pathXml, xmlName));
                 XmlNode root = xml.DocumentElement;
                 IEnumerator ie = root.SelectNodes("element").GetEnumerator();
                 while (ie.MoveNext())
@@ -1551,7 +1567,7 @@ namespace Hook_Validator
                         getCorrection = (ie.Current as XmlNode).Attributes["baseValue"].Value;
                     }
                 }
-                xml.Save(pathXml + xmlName);
+                xml.Save(Path.Combine(pathXml, xmlName));
                 GetCurrentTab();
                 string idElement = getElementId();
                 // string cssElement = getElementCssSelector();
@@ -1571,7 +1587,7 @@ namespace Hook_Validator
                     newByValue = By.Id(value);
                 }
                 XmlDocument xmlUpdate = new XmlDocument();
-                xmlUpdate.Load(pathXml + xmlName);
+                xmlUpdate.Load(Path.Combine(pathXml, xmlName));
                 XmlNode roott = xmlUpdate.DocumentElement;
                 IEnumerator iee = roott.SelectNodes("element").GetEnumerator();
                 while (iee.MoveNext())
@@ -1582,15 +1598,15 @@ namespace Hook_Validator
                         (iee.Current as XmlNode).Attributes["value"].Value = value;
                     }
                 }
-                xmlUpdate.Save(pathXml + xmlName);
-                List<string> list = File.ReadAllLines(pathXml + xmlName).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
+                xmlUpdate.Save(Path.Combine(pathXml, xmlName));
+                List<string> list = File.ReadAllLines(Path.Combine(pathXml, xmlName)).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
                 List<string> listReplace = list.Select(x => x.Replace("&gt;", ">")
                 .Replace("&lt", "<")
                 .Replace("&apos;", "'")
                 .Replace("&quot;", "\"")
                 .Replace("&amp;", "&"))
                     .ToList();
-                File.WriteAllLines(pathXml + xmlName, listReplace);
+                File.WriteAllLines(Path.Combine(pathXml, xmlName), listReplace);
             }
         }
 
@@ -1821,9 +1837,11 @@ return css;
 
         public static void Encrypt()
         {
-            string filePath = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName;
-            string currentDirectory = Environment.CurrentDirectory;
-            string[] directories = System.IO.Directory.GetFiles(filePath, "*", SearchOption.AllDirectories);
+            string baseDir = Path.GetFullPath(Path.Combine(
+                Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+                "..", "..", ".."));
+
+            string[] directories = System.IO.Directory.GetFiles(baseDir, "*", SearchOption.AllDirectories);
             var teste = directories.Where(x => x.EndsWith("properties") || x.EndsWith("propertie") || x.EndsWith("propriedades"));
             string file = null;
             foreach (string directory in teste) { file = directory; break; }
@@ -1848,9 +1866,11 @@ return css;
 
         public static void Decrypt()
         {
-            string filePath = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName;
-            string currentDirectory = Environment.CurrentDirectory;
-            string[] directories = System.IO.Directory.GetFiles(filePath, "*", SearchOption.AllDirectories);
+            string baseDir = Path.GetFullPath(Path.Combine(
+                Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+                "..", "..", ".."));
+
+            string[] directories = System.IO.Directory.GetFiles(baseDir, "*", SearchOption.AllDirectories);
             var teste = directories.Where(x => x.EndsWith("properties") || x.EndsWith("propertie") || x.EndsWith("propriedades"));
             string file = null;
             foreach (string directory in teste) { file = directory; break; }
@@ -1924,9 +1944,11 @@ decryptor, CryptoStreamMode.Read))
 
         public static string stringSecret(string value)
         {
-            string filePath = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName;
-            string currentDirectory = Environment.CurrentDirectory;
-            string[] directories = System.IO.Directory.GetFiles(filePath, "*", SearchOption.AllDirectories);
+            string baseDir = Path.GetFullPath(Path.Combine(
+                Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+                "..", "..", ".."));
+
+            string[] directories = System.IO.Directory.GetFiles(baseDir, "*", SearchOption.AllDirectories);
             var teste = directories.Where(x => x.EndsWith("properties") || x.EndsWith("propertie") || x.EndsWith("propriedades"));
             string file = null;
             foreach (string directory in teste) { file = directory; break; }
@@ -2094,9 +2116,11 @@ decryptor, CryptoStreamMode.Read))
 
         private static void SelfCorrectionParameters(string beforeError, string updateNewValue)
         {
-            string filePath = System.IO.Directory.GetParent(System.IO.Directory.GetParent(System.IO.Directory.GetParent(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)).FullName).FullName).FullName;
-            string currentDirectory = Environment.CurrentDirectory;
-            string[] directories = System.IO.Directory.GetFiles(filePath, "*", SearchOption.AllDirectories);
+            string baseDir = Path.GetFullPath(Path.Combine(
+                Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+                "..", "..", ".."));
+
+            string[] directories = System.IO.Directory.GetFiles(baseDir, "*", SearchOption.AllDirectories);
             foreach (string file in directories)
             {
                 switch (file)
@@ -2127,7 +2151,8 @@ decryptor, CryptoStreamMode.Read))
 
         private static void writeFileTxt()
         {
-            using (StreamWriter save = new StreamWriter(filePath + @"\CountPng.txt"))
+            string countFilePath = Path.Combine(filePath, "CountPng.txt");
+            using (StreamWriter save = new StreamWriter(countFilePath))
             {
                 if (string.IsNullOrEmpty(getCount))
                 {
@@ -2147,7 +2172,8 @@ decryptor, CryptoStreamMode.Read))
 
         private static void readFileTxt()
         {
-            using (StreamReader load = new StreamReader(filePath + @"\CountPng.txt"))
+            string countFilePath = Path.Combine(filePath, "CountPng.txt");
+            using (StreamReader load = new StreamReader(countFilePath))
             {
                 getCount = load.ReadLine();
             }
