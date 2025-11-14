@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using WebDriverManager.DriverConfigs.Impl;
 
 namespace Hook_Validator
 {
@@ -276,14 +277,12 @@ namespace Hook_Validator
                         optionChrome.AddArgument("--disable-software-rasterizer");
                         optionChrome.AddArgument("--disable-dev-tools");
                         optionChrome.AddArgument("--no-zygote");
-                        optionChrome.AddArgument("--single-process"); // Importante para containers
+                        optionChrome.AddArgument("--single-process");
 
-                        // Desabilita recursos que causam problemas no container
                         optionChrome.AddArgument("--disable-blink-features=AutomationControlled");
                         optionChrome.AddArgument("--disable-extensions");
                         optionChrome.AddArgument("--disable-background-networking");
 
-                        // Configurações de download
                         optionChrome.AddUserProfilePreference("download.default_directory", "/tmp/downloads");
                         optionChrome.AddUserProfilePreference("download.prompt_for_download", false);
                         optionChrome.AddUserProfilePreference("disable-popup-blocking", true);
@@ -315,20 +314,34 @@ namespace Hook_Validator
 
                     try
                     {
-                        ChromeDriverService service = ChromeDriverService.CreateDefaultService();
-                        service.SuppressInitialDiagnosticInformation = true;
+                        ChromeDriverService service;
 
-                        // IMPORTANTE: Adicionar variáveis de ambiente
+                        // ✅ WINDOWS: Usa WebDriverManager
+                        if (isWindows)
+                        {
+                            new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
+                            service = ChromeDriverService.CreateDefaultService();
+                            Console.WriteLine("ChromeDriver configurado via WebDriverManager (Windows)");
+                        }
+                        // ✅ LINUX: Usa chromedriver do PATH (instalado no Dockerfile)
+                        else
+                        {
+                            service = ChromeDriverService.CreateDefaultService();
+                            Console.WriteLine("Usando ChromeDriver do PATH (Linux)");
+                        }
+
+                        service.SuppressInitialDiagnosticInformation = true;
                         service.HideCommandPromptWindow = true;
+
+                        Console.WriteLine($"Iniciando ChromeDriver...");
 
                         Selenium.driver = new ChromeDriver(service, optionChrome, TimeSpan.FromSeconds(60));
 
-                        // ⚠️ CRÍTICO: Não use Maximize() no Linux, use SetWindowSize
+                        // ⚠️ CRÍTICO: Maximize() causa erro no Linux, usar Size
                         if (isLinux)
                         {
-                            // Defina tamanho fixo em vez de maximizar
                             Selenium.driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
-                            Console.WriteLine("ChromeDriver iniciado com sucesso no Linux (tamanho definido: 1920x1080)");
+                            Console.WriteLine("ChromeDriver iniciado com sucesso no Linux (tamanho: 1920x1080)");
                         }
                         else
                         {
@@ -360,7 +373,20 @@ namespace Hook_Validator
                     if (!string.IsNullOrEmpty(device))
                         optionEdge.EnableMobileEmulation(device);
 
-                    Selenium.driver = new EdgeDriver(EdgeDriverService.CreateDefaultService(), optionEdge, TimeSpan.FromSeconds(60));
+                    EdgeDriverService edgeService;
+                    if (isWindows)
+                    {
+                        new WebDriverManager.DriverManager().SetUpDriver(new EdgeConfig());
+                        edgeService = EdgeDriverService.CreateDefaultService();
+                        Console.WriteLine("EdgeDriver configurado via WebDriverManager (Windows)");
+                    }
+                    else
+                    {
+                        edgeService = EdgeDriverService.CreateDefaultService();
+                        Console.WriteLine("Usando EdgeDriver do PATH (Linux)");
+                    }
+
+                    Selenium.driver = new EdgeDriver(edgeService, optionEdge, TimeSpan.FromSeconds(60));
 
                     if (isLinux)
                     {
@@ -385,12 +411,22 @@ namespace Hook_Validator
                     if (headless.Equals("--headless"))
                     {
                         optionFirefox.AddArgument("--headless");
-                        Selenium.driver = new FirefoxDriver(FirefoxDriverService.CreateDefaultService(), optionFirefox, TimeSpan.FromSeconds(60));
+                    }
+
+                    FirefoxDriverService firefoxService;
+                    if (isWindows)
+                    {
+                        new WebDriverManager.DriverManager().SetUpDriver(new FirefoxConfig());
+                        firefoxService = FirefoxDriverService.CreateDefaultService();
+                        Console.WriteLine("FirefoxDriver configurado via WebDriverManager (Windows)");
                     }
                     else
                     {
-                        Selenium.driver = new FirefoxDriver(FirefoxDriverService.CreateDefaultService(), optionFirefox, TimeSpan.FromSeconds(60));
+                        firefoxService = FirefoxDriverService.CreateDefaultService();
+                        Console.WriteLine("Usando FirefoxDriver do PATH (Linux)");
                     }
+
+                    Selenium.driver = new FirefoxDriver(firefoxService, optionFirefox, TimeSpan.FromSeconds(60));
 
                     if (isLinux)
                     {
