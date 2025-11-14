@@ -1302,7 +1302,7 @@ namespace Hook_Validator
         ///  Método Action do Selenium para movimentar até o elemento sem clicar
         /// </summary>
         /// <param name="element">Elemento onde sera apenas ativado quando o action executar</param>
-        public static void ActionDragAndDrop(IWebElement element)
+        public static void ActionMoveElement(IWebElement element)
         {
             WaitElement(element);
             Actions actions = new Actions(Selenium.driver);
@@ -1313,7 +1313,7 @@ namespace Hook_Validator
         ///  Método Action do Selenium para movimentar até o elemento sem clicar
         /// </summary>
         /// <param name="element">Elemento onde sera apenas ativado quando o action executar</param>
-        public static void ActionDragAndDrop(string locator, int timeout = TIMEOUT_CONST)
+        public static void ActionMoveElement(string locator, int timeout = TIMEOUT_CONST)
         {
             By byLocator = GetLocator(locator);
             WebDriverWait wait = new WebDriverWait(Selenium.driver, TimeSpan.FromSeconds(timeout));
