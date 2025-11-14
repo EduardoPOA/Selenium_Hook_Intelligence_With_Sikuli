@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using WebDriverManager.DriverConfigs.Impl;
 
 namespace Hook_Validator
 {
@@ -28,6 +27,7 @@ namespace Hook_Validator
         public static string getPathLocator { get; set; }
         public static ConcurrentDictionary<string, ExtentTest> FeatureDictionary = new ConcurrentDictionary<string, ExtentTest>();
 
+        // REMOÇÃO: A maioria dos métodos de busca de driver e GetDriverExtension foram removidos.
 
         /// <summary>
         ///  Preparação do relatório e especificação dos caminhos das pastas
@@ -95,7 +95,7 @@ namespace Hook_Validator
                 }
             }
 
-            // Limpar pastas dos browsers
+            // Limpar pastas dos browsers (Não é mais necessário se a lógica de GetDriver for removida, mas mantido por segurança)
             string[] browserFolders = { "Chrome", "Edge", "Firefox" };
             string baseFolderPath = AppDomain.CurrentDomain.BaseDirectory;
             foreach (var browserFolder in browserFolders)
@@ -257,115 +257,157 @@ namespace Hook_Validator
 
         internal static void SelectBrowser(string browserType, string headless, string device)
         {
+            // Detectar o sistema operacional
+            bool isLinux = Environment.OSVersion.Platform == PlatformID.Unix ||
+                           Environment.OSVersion.Platform == PlatformID.MacOSX;
+            bool isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
+
             switch (browserType)
             {
                 case "Chrome":
-                    new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
                     ChromeOptions optionChrome = new ChromeOptions();
-                    optionChrome.AddArgument(headless);
-                    if (!string.IsNullOrEmpty(device))
-                        optionChrome.EnableMobileEmulation(device);
-                    Selenium.driver = new ChromeDriver(GetChromeDriver(), optionChrome);
-                    Selenium.driver.Manage().Window.Maximize();
-                    break;
-                case "Edge":
-                    new WebDriverManager.DriverManager().SetUpDriver(new EdgeConfig());
-                    EdgeOptions optionEdge = new EdgeOptions();
-                    optionEdge.AddArgument(headless);
-                    if (!string.IsNullOrEmpty(device))
-                        optionEdge.EnableMobileEmulation(device);
-                    Selenium.driver = new EdgeDriver(GetEdgeDriver(), optionEdge);
-                    Selenium.driver.Manage().Window.Maximize();
-                    break;
-                case "Firefox":
-                    new WebDriverManager.DriverManager().SetUpDriver(new FirefoxConfig());
-                    FirefoxOptions optionFirefox = new FirefoxOptions();
+
+                    // CONFIGURAÇÕES ESPECÍFICAS PARA LINUX
+                    if (isLinux)
+                    {
+                        optionChrome.AddArgument("--no-sandbox");
+                        optionChrome.AddArgument("--disable-dev-shm-usage");
+                        optionChrome.AddArgument("--disable-gpu");
+                        optionChrome.AddArgument("--disable-software-rasterizer");
+                        optionChrome.AddArgument("--disable-dev-tools");
+                        optionChrome.AddArgument("--no-zygote");
+                        optionChrome.AddArgument("--single-process"); // Importante para containers
+
+                        // Desabilita recursos que causam problemas no container
+                        optionChrome.AddArgument("--disable-blink-features=AutomationControlled");
+                        optionChrome.AddArgument("--disable-extensions");
+                        optionChrome.AddArgument("--disable-background-networking");
+
+                        // Configurações de download
+                        optionChrome.AddUserProfilePreference("download.default_directory", "/tmp/downloads");
+                        optionChrome.AddUserProfilePreference("download.prompt_for_download", false);
+                        optionChrome.AddUserProfilePreference("disable-popup-blocking", true);
+
+                        Console.WriteLine("Aplicando configurações específicas para Linux");
+                    }
+
+                    // CONFIGURAÇÕES COMUNS
+                    optionChrome.AddArgument("--disable-extensions");
+                    optionChrome.AddArgument("--disable-background-timer-throttling");
+                    optionChrome.AddArgument("--disable-backgrounding-occluded-windows");
+                    optionChrome.AddArgument("--disable-renderer-backgrounding");
+                    optionChrome.AddArgument("--disable-features=TranslateUI");
+                    optionChrome.AddArgument("--disable-ipc-flooding-protection");
+
+                    // Headless mode
                     if (headless.Equals("--headless"))
                     {
-                        optionFirefox.AddArgument(headless);
-                        Selenium.driver = new FirefoxDriver(GetFirefoxDriver(), optionFirefox);
+                        optionChrome.AddArgument("--headless=new");
+                    }
+                    else if (!string.IsNullOrEmpty(headless))
+                    {
+                        optionChrome.AddArgument(headless);
+                    }
+
+                    // Mobile emulation
+                    if (!string.IsNullOrEmpty(device))
+                        optionChrome.EnableMobileEmulation(device);
+
+                    try
+                    {
+                        ChromeDriverService service = ChromeDriverService.CreateDefaultService();
+                        service.SuppressInitialDiagnosticInformation = true;
+
+                        // IMPORTANTE: Adicionar variáveis de ambiente
+                        service.HideCommandPromptWindow = true;
+
+                        Selenium.driver = new ChromeDriver(service, optionChrome, TimeSpan.FromSeconds(60));
+
+                        // ⚠️ CRÍTICO: Não use Maximize() no Linux, use SetWindowSize
+                        if (isLinux)
+                        {
+                            // Defina tamanho fixo em vez de maximizar
+                            Selenium.driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
+                            Console.WriteLine("ChromeDriver iniciado com sucesso no Linux (tamanho definido: 1920x1080)");
+                        }
+                        else
+                        {
+                            Selenium.driver.Manage().Window.Maximize();
+                            Console.WriteLine("ChromeDriver iniciado com sucesso no Windows");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erro ao iniciar ChromeDriver: {ex.Message}");
+                        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                        throw;
+                    }
+                    break;
+
+                case "Edge":
+                    EdgeOptions optionEdge = new EdgeOptions();
+
+                    if (isLinux)
+                    {
+                        optionEdge.AddArgument("--no-sandbox");
+                        optionEdge.AddArgument("--disable-dev-shm-usage");
+                        optionEdge.AddArgument("--disable-gpu");
+                    }
+
+                    if (!string.IsNullOrEmpty(headless))
+                        optionEdge.AddArgument(headless);
+
+                    if (!string.IsNullOrEmpty(device))
+                        optionEdge.EnableMobileEmulation(device);
+
+                    Selenium.driver = new EdgeDriver(EdgeDriverService.CreateDefaultService(), optionEdge, TimeSpan.FromSeconds(60));
+
+                    if (isLinux)
+                    {
+                        Selenium.driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
+                        Console.WriteLine("EdgeDriver iniciado com sucesso no Linux");
                     }
                     else
                     {
-                        Selenium.driver = new FirefoxDriver(GetFirefoxDriver());
+                        Selenium.driver.Manage().Window.Maximize();
+                        Console.WriteLine("EdgeDriver iniciado com sucesso no Windows");
                     }
-                    Selenium.driver.Manage().Window.Maximize();
+                    break;
+
+                case "Firefox":
+                    FirefoxOptions optionFirefox = new FirefoxOptions();
+
+                    if (isLinux)
+                    {
+                        optionFirefox.AddArgument("--headless");
+                    }
+
+                    if (headless.Equals("--headless"))
+                    {
+                        optionFirefox.AddArgument("--headless");
+                        Selenium.driver = new FirefoxDriver(FirefoxDriverService.CreateDefaultService(), optionFirefox, TimeSpan.FromSeconds(60));
+                    }
+                    else
+                    {
+                        Selenium.driver = new FirefoxDriver(FirefoxDriverService.CreateDefaultService(), optionFirefox, TimeSpan.FromSeconds(60));
+                    }
+
+                    if (isLinux)
+                    {
+                        Selenium.driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
+                        Console.WriteLine("FirefoxDriver iniciado com sucesso no Linux");
+                    }
+                    else
+                    {
+                        Selenium.driver.Manage().Window.Maximize();
+                        Console.WriteLine("FirefoxDriver iniciado com sucesso no Windows");
+                    }
                     break;
             }
         }
 
-        private static string GetChromeDriver()
-        {
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string folderChrome = Path.Combine(baseDirectory, "Chrome");
-
-            if (!Directory.Exists(folderChrome))
-                return baseDirectory;
-
-            // Buscar o executável do driver considerando diferentes sistemas operacionais
-            string driverFile = FindDriverFile(folderChrome, "chromedriver*");
-            return driverFile != null ? Path.GetDirectoryName(driverFile) : baseDirectory;
-        }
-
-        private static string GetEdgeDriver()
-        {
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string folderEdge = Path.Combine(baseDirectory, "Edge");
-
-            if (!Directory.Exists(folderEdge))
-                return baseDirectory;
-
-            // Buscar o executável do driver considerando diferentes sistemas operacionais
-            string driverFile = FindDriverFile(folderEdge, "msedgedriver*");
-            return driverFile != null ? Path.GetDirectoryName(driverFile) : baseDirectory;
-        }
-
-        private static string GetFirefoxDriver()
-        {
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string folderFirefox = Path.Combine(baseDirectory, "Firefox");
-
-            if (!Directory.Exists(folderFirefox))
-                return baseDirectory;
-
-            // Buscar o executável do driver considerando diferentes sistemas operacionais
-            string driverFile = FindDriverFile(folderFirefox, "geckodriver*");
-            return driverFile != null ? Path.GetDirectoryName(driverFile) : baseDirectory;
-        }
-
-        private static string FindDriverFile(string directory, string searchPattern)
-        {
-            try
-            {
-                var files = Directory.GetFiles(directory, searchPattern, SearchOption.AllDirectories);
-
-                // Priorizar o executável correto para o sistema operacional
-                string osSpecificExtension = GetDriverExtension();
-                var osSpecificFile = files.FirstOrDefault(f => f.EndsWith(osSpecificExtension));
-
-                return osSpecificFile ?? files.FirstOrDefault();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error finding driver file: {ex.Message}");
-                return null;
-            }
-        }
-
-        private static string GetDriverExtension()
-        {
-            switch (Environment.OSVersion.Platform)
-            {
-                case PlatformID.Win32NT:
-                    return ".exe";
-                case PlatformID.Unix:
-                    return ""; // Linux e macOS
-                case PlatformID.MacOSX:
-                    return "";
-                default:
-                    return ".exe"; // fallback
-            }
-        }
+        // --- MÉTODOS REMOVIDOS ---
+        // GetChromeDriver(), GetEdgeDriver(), GetFirefoxDriver(), FindDriverFile(), GetDriverExtension()
 
         private static string[] GetDriverProcessNames()
         {
