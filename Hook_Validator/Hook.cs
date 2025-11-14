@@ -258,7 +258,6 @@ namespace Hook_Validator
 
         internal static void SelectBrowser(string browserType, string headless, string device)
         {
-            // Detectar o sistema operacional
             bool isLinux = Environment.OSVersion.Platform == PlatformID.Unix ||
                            Environment.OSVersion.Platform == PlatformID.MacOSX;
             bool isWindows = Environment.OSVersion.Platform == PlatformID.Win32NT;
@@ -268,20 +267,22 @@ namespace Hook_Validator
                 case "Chrome":
                     ChromeOptions optionChrome = new ChromeOptions();
 
-                    // CONFIGURAÇÕES ESPECÍFICAS PARA LINUX
                     if (isLinux)
                     {
                         optionChrome.AddArgument("--no-sandbox");
                         optionChrome.AddArgument("--disable-dev-shm-usage");
                         optionChrome.AddArgument("--disable-gpu");
                         optionChrome.AddArgument("--disable-software-rasterizer");
-                        optionChrome.AddArgument("--disable-dev-tools");
-                        optionChrome.AddArgument("--no-zygote");
-                        optionChrome.AddArgument("--single-process");
-
                         optionChrome.AddArgument("--disable-blink-features=AutomationControlled");
                         optionChrome.AddArgument("--disable-extensions");
                         optionChrome.AddArgument("--disable-background-networking");
+                        optionChrome.AddArgument("--disable-default-apps");
+                        optionChrome.AddArgument("--disable-sync");
+                        optionChrome.AddArgument("--metrics-recording-only");
+                        optionChrome.AddArgument("--mute-audio");
+                        optionChrome.AddArgument("--no-first-run");
+                        optionChrome.AddArgument("--safebrowsing-disable-auto-update");
+                        optionChrome.AddArgument("--disable-features=VizDisplayCompositor");
 
                         optionChrome.AddUserProfilePreference("download.default_directory", "/tmp/downloads");
                         optionChrome.AddUserProfilePreference("download.prompt_for_download", false);
@@ -290,15 +291,12 @@ namespace Hook_Validator
                         Console.WriteLine("Aplicando configurações específicas para Linux");
                     }
 
-                    // CONFIGURAÇÕES COMUNS
-                    optionChrome.AddArgument("--disable-extensions");
                     optionChrome.AddArgument("--disable-background-timer-throttling");
                     optionChrome.AddArgument("--disable-backgrounding-occluded-windows");
                     optionChrome.AddArgument("--disable-renderer-backgrounding");
                     optionChrome.AddArgument("--disable-features=TranslateUI");
                     optionChrome.AddArgument("--disable-ipc-flooding-protection");
 
-                    // Headless mode
                     if (headless.Equals("--headless"))
                     {
                         optionChrome.AddArgument("--headless=new");
@@ -308,7 +306,6 @@ namespace Hook_Validator
                         optionChrome.AddArgument(headless);
                     }
 
-                    // Mobile emulation
                     if (!string.IsNullOrEmpty(device))
                         optionChrome.EnableMobileEmulation(device);
 
@@ -316,17 +313,16 @@ namespace Hook_Validator
                     {
                         ChromeDriverService service;
 
-                        // ✅ WINDOWS: Usa WebDriverManager
                         if (isWindows)
                         {
                             new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
                             service = ChromeDriverService.CreateDefaultService();
                             Console.WriteLine("ChromeDriver configurado via WebDriverManager (Windows)");
                         }
-                        // ✅ LINUX: Usa chromedriver do PATH (instalado no Dockerfile)
                         else
                         {
                             service = ChromeDriverService.CreateDefaultService();
+                            service.EnableVerboseLogging = false;
                             Console.WriteLine("Usando ChromeDriver do PATH (Linux)");
                         }
 
@@ -335,9 +331,12 @@ namespace Hook_Validator
 
                         Console.WriteLine($"Iniciando ChromeDriver...");
 
-                        Selenium.driver = new ChromeDriver(service, optionChrome, TimeSpan.FromSeconds(60));
+                        Selenium.driver = new ChromeDriver(service, optionChrome, TimeSpan.FromSeconds(120));
 
-                        // ⚠️ CRÍTICO: Maximize() causa erro no Linux, usar Size
+                        Selenium.driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+                        Selenium.driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(60);
+                        Selenium.driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(30);
+
                         if (isLinux)
                         {
                             Selenium.driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
@@ -386,7 +385,7 @@ namespace Hook_Validator
                         Console.WriteLine("Usando EdgeDriver do PATH (Linux)");
                     }
 
-                    Selenium.driver = new EdgeDriver(edgeService, optionEdge, TimeSpan.FromSeconds(60));
+                    Selenium.driver = new EdgeDriver(edgeService, optionEdge, TimeSpan.FromSeconds(120));
 
                     if (isLinux)
                     {
@@ -426,7 +425,7 @@ namespace Hook_Validator
                         Console.WriteLine("Usando FirefoxDriver do PATH (Linux)");
                     }
 
-                    Selenium.driver = new FirefoxDriver(firefoxService, optionFirefox, TimeSpan.FromSeconds(60));
+                    Selenium.driver = new FirefoxDriver(firefoxService, optionFirefox, TimeSpan.FromSeconds(120));
 
                     if (isLinux)
                     {
