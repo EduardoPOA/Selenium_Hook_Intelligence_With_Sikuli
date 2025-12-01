@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<Version>27.0.0</Version>
+		<Version>30.0.0</Version>
 		<PackageId>Super_Automation_Sikuli</PackageId>
 		<Authors>Eduardo Oliveira</Authors>
 		<Product>Eduardo Oliveira</Product>
@@ -13,7 +13,6 @@
 	<ItemGroup>
 		<PackageReference Include="Authlete.Authlete" Version="1.5.0" />
 		<PackageReference Include="DotNetSeleniumExtras.WaitHelpers" Version="3.11.0" />
-		<PackageReference Include="DotNetZip" Version="1.16.0" />
 		<PackageReference Include="ExtentReports" Version="4.1.0" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
 		<PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />

@@ -72,23 +72,6 @@
           "lib/netstandard2.0/SeleniumExtras.WaitHelpers.dll": {}
         }
       },
-      "DotNetZip/1.16.0": {
-        "type": "package",
-        "dependencies": {
-          "System.Security.Permissions": "4.7.0",
-          "System.Text.Encoding.CodePages": "4.7.1"
-        },
-        "compile": {
-          "lib/netstandard2.0/DotNetZip.dll": {
-            "related": ".pdb;.xml"
-          }
-        },
-        "runtime": {
-          "lib/netstandard2.0/DotNetZip.dll": {
-            "related": ".pdb;.xml"
-          }
-        }
-      },
       "ExtentReports/4.1.0": {
         "type": "package",
         "dependencies": {
@@ -2964,10 +2947,10 @@
           }
         }
       },
-      "System.Security.Permissions/4.7.0": {
+      "System.Security.Permissions/4.5.0": {
         "type": "package",
         "dependencies": {
-          "System.Security.AccessControl": "4.7.0"
+          "System.Security.AccessControl": "4.5.0"
         },
         "compile": {
           "ref/netstandard2.0/System.Security.Permissions.dll": {
@@ -2975,9 +2958,7 @@
           }
         },
         "runtime": {
-          "lib/netstandard2.0/System.Security.Permissions.dll": {
-            "related": ".xml"
-          }
+          "lib/netstandard2.0/System.Security.Permissions.dll": {}
         }
       },
       "System.Security.Principal/4.3.0": {
@@ -3476,23 +3457,6 @@
         "lib/net40/SeleniumExtras.WaitHelpers.dll",
         "lib/net45/SeleniumExtras.WaitHelpers.dll",
         "lib/netstandard2.0/SeleniumExtras.WaitHelpers.dll"
-      ]
-    },
-    "DotNetZip/1.16.0": {
-      "sha512": "CS9sjjXF23FLIbwlLT5k/jXBYxVnLMn01lyAvN/hxFM+UDvSicjTPB9ZMA+Wp/QlvBPbD2pzkAXUp1O50gP/Lw==",
-      "type": "package",
-      "path": "dotnetzip/1.16.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "dotnetzip.1.16.0.nupkg.sha512",
-        "dotnetzip.nuspec",
-        "lib/net40/DotNetZip.dll",
-        "lib/net40/DotNetZip.pdb",
-        "lib/net40/DotNetZip.xml",
-        "lib/netstandard2.0/DotNetZip.dll",
-        "lib/netstandard2.0/DotNetZip.pdb",
-        "lib/netstandard2.0/DotNetZip.xml"
       ]
     },
     "ExtentReports/4.1.0": {
@@ -8467,28 +8431,22 @@
         "system.security.cryptography.x509certificates.nuspec"
       ]
     },
-    "System.Security.Permissions/4.7.0": {
-      "sha512": "dkOV6YYVBnYRa15/yv004eCGRBVADXw8qRbbNiCn/XpdJSUXkkUeIvdvFHkvnko4CdKMqG8yRHC4ox83LSlMsQ==",
+    "System.Security.Permissions/4.5.0": {
+      "sha512": "9gdyuARhUR7H+p5CjyUB/zPk7/Xut3wUSP8NJQB6iZr8L3XUXTMdoLeVAg9N4rqF8oIpE7MpdqHdDHQ7XgJe0g==",
       "type": "package",
-      "path": "system.security.permissions/4.7.0",
+      "path": "system.security.permissions/4.5.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "lib/net461/System.Security.Permissions.dll",
-        "lib/net461/System.Security.Permissions.xml",
-        "lib/netcoreapp3.0/System.Security.Permissions.dll",
-        "lib/netcoreapp3.0/System.Security.Permissions.xml",
         "lib/netstandard2.0/System.Security.Permissions.dll",
-        "lib/netstandard2.0/System.Security.Permissions.xml",
         "ref/net461/System.Security.Permissions.dll",
         "ref/net461/System.Security.Permissions.xml",
-        "ref/netcoreapp3.0/System.Security.Permissions.dll",
-        "ref/netcoreapp3.0/System.Security.Permissions.xml",
         "ref/netstandard2.0/System.Security.Permissions.dll",
         "ref/netstandard2.0/System.Security.Permissions.xml",
-        "system.security.permissions.4.7.0.nupkg.sha512",
+        "system.security.permissions.4.5.0.nupkg.sha512",
         "system.security.permissions.nuspec",
         "useSharedDesignerContext.txt",
         "version.txt"
@@ -9623,7 +9581,6 @@
     ".NETStandard,Version=v2.0": [
       "Authlete.Authlete >= 1.5.0",
       "DotNetSeleniumExtras.WaitHelpers >= 3.11.0",
-      "DotNetZip >= 1.16.0",
       "ExtentReports >= 4.1.0",
       "Microsoft.NETCore.Platforms >= 7.0.4",
       "Microsoft.Win32.Registry >= 5.0.0",
@@ -9641,7 +9598,7 @@
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
-    "version": "27.0.0",
+    "version": "30.0.0",
     "restore": {
       "projectUniqueName": "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
       "projectName": "Super_Automation_Sikuli",
@@ -9694,10 +9651,6 @@
           "DotNetSeleniumExtras.WaitHelpers": {
             "target": "Package",
             "version": "[3.11.0, )"
-          },
-          "DotNetZip": {
-            "target": "Package",
-            "version": "[1.16.0, )"
           },
           "ExtentReports": {
             "target": "Package",
@@ -9756,17 +9709,5 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'DotNetZip' 1.16.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-xhg6-9j5j-w4vf",
-      "libraryId": "DotNetZip",
-      "targetGraphs": [
-        ".NETStandard,Version=v2.0"
-      ]
-    }
-  ]
+  }
 }

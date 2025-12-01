@@ -1,10 +1,8 @@
-﻿/*
- * @author Eduardo Oliveira
- */
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.IO.Compression;
 
 namespace Hook_Validator.Util
 {
@@ -12,99 +10,61 @@ namespace Hook_Validator.Util
     {
         private Process APIProcess;
         private ProcessStartInfo APIProcessStartInfo;
-        public String API_Output;
         private String APIJar;
         private String WorkingDir;
         private String APIPath;
-        private String JdkRepoAddress;
-        private String SikuliRepoAddress;
+        private String ZipUrl;
 
         public SikuliDriver(bool Windowless = false)
         {
-            APIJar = "sikulirestapi-1.0.jar"; // Nome do JAR do Sikuli
+            APIJar = "sikulirestapi-1.0.jar";
             WorkingDir = Directory.GetCurrentDirectory();
-
-            // Caminho do JAR na pasta Jdk
             APIPath = Path.Combine(WorkingDir, "Jdk", APIJar);
 
-            // URL para baixar o JDK e o JAR do Sikuli caso não estejam presentes
-            JdkRepoAddress = "https://raw.githubusercontent.com/EduardoPOA/JdkForSikuli/main/Jdk/"; // Endereço para os executáveis do JDK
-            SikuliRepoAddress = "https://raw.githubusercontent.com/EduardoPOA/JdkForSikuli/main/Jdk/sikulirestapi-1.0.jar"; // URL para o JAR do Sikuli
+            // URL RAW correta
+            ZipUrl = "https://raw.githubusercontent.com/EduardoPOA/JdkForSikuli/main/Jdk/Jdk.zip";
 
-            // Define o executável java com base na opção Windowless
             string javaExecutable = Windowless ? "javaw.exe" : "java.exe";
-            string jdkPath = Path.Combine(WorkingDir, "Jdk", javaExecutable); // Caminho para o executável na pasta Jdk
+            string jdkPath = Path.Combine(WorkingDir, "Jdk", javaExecutable);
 
-            // Certifique-se de que o executável Java está presente
+            // se não existe, baixa o zip e extrai
             if (!File.Exists(jdkPath))
             {
-                DownloadJdkFiles(); // Baixa os arquivos JDK se não existirem
-                if (!File.Exists(jdkPath))
-                {
-                    throw new FileNotFoundException($"O executável {javaExecutable} não foi encontrado em: {jdkPath}");
-                }
+                DownloadAndExtractJdk();
             }
 
-            // Certifique-se de que o JAR do Sikuli está presente
+            if (!File.Exists(jdkPath))
+                throw new FileNotFoundException($"Java não encontrado em {jdkPath}");
+
             if (!File.Exists(APIPath))
-            {
-                DownloadSikuliJar(); // Baixa o JAR se ele não estiver presente
-                if (!File.Exists(APIPath))
-                {
-                    throw new FileNotFoundException($"O arquivo {APIJar} não foi encontrado na pasta Jdk: {APIPath}");
-                }
-            }
+                throw new FileNotFoundException($"Sikuli JAR não encontrado em {APIPath}");
 
-            // Configura o ProcessStartInfo para usar o java na pasta Jdk e o JAR já presente
-            APIProcessStartInfo = new ProcessStartInfo(jdkPath, "-jar \"" + APIPath + "\"");
+            APIProcessStartInfo =
+                new ProcessStartInfo(jdkPath, "-jar \"" + APIPath + "\"");
+
             APIProcess = new Process();
             APIProcess.StartInfo = APIProcessStartInfo;
         }
 
-        private void DownloadJdkFiles()
+        private void DownloadAndExtractJdk()
         {
-            // Cria a pasta Jdk se não existir
-            string jdkDirectory = Path.Combine(WorkingDir, "Jdk");
-            Directory.CreateDirectory(jdkDirectory);
+            string zipPath = Path.Combine(WorkingDir, "Jdk.zip");
+            string extractPath = Path.Combine(WorkingDir, "Jdk");
 
-            // Baixa os arquivos JDK (java.exe e javaw.exe)
-            string[] executables = { "java.exe", "javaw.exe" };
+            if (!Directory.Exists(extractPath))
+                Directory.CreateDirectory(extractPath);
 
-            foreach (var exe in executables)
-            {
-                string fileUrl = JdkRepoAddress + exe;
-                string filePath = Path.Combine(jdkDirectory, exe);
-                using (WebClient client = new WebClient())
-                {
-                    try
-                    {
-                        client.DownloadFile(fileUrl, filePath);
-                        Util.Log.WriteLine($"Arquivo baixado: {filePath}");
-                    }
-                    catch (WebException ex)
-                    {
-                        Util.Log.WriteLine($"Erro ao baixar {exe}: {ex.Message}");
-                    }
-                }
-            }
-        }
-
-        private void DownloadSikuliJar()
-        {
-            // Baixa o JAR do Sikuli se ele não estiver presente
-            string filePath = APIPath; // Caminho onde o JAR será salvo
             using (WebClient client = new WebClient())
             {
-                try
-                {
-                    client.DownloadFile(SikuliRepoAddress, filePath);
-                    Util.Log.WriteLine($"Arquivo JAR do Sikuli baixado: {filePath}");
-                }
-                catch (WebException ex)
-                {
-                    Util.Log.WriteLine($"Erro ao baixar o JAR do Sikuli: {ex.Message}");
-                }
+                Util.Log.WriteLine("Baixando JDK ZIP ...");
+                client.DownloadFile(ZipUrl, zipPath);
             }
+
+            Util.Log.WriteLine("Extraindo JDK ...");
+            ZipFile.ExtractToDirectory(zipPath, extractPath, true);
+            File.Delete(zipPath);
+
+            Util.Log.WriteLine("JDK instalada em: " + extractPath);
         }
 
         public void Start()
@@ -117,9 +77,6 @@ namespace Hook_Validator.Util
         {
             Util.Log.WriteLine("Parando servidor jetty ...");
             APIProcess.Kill();
-            Util.Log.WriteLine("Servidor Jetty parado!");
-            Util.Log.WriteLine("O registro do cliente para esta execução de teste pode ser localizado em: " + Util.Log.LogPath);
-            Util.Log.WriteLine("Saindo ...");
         }
     }
 }
