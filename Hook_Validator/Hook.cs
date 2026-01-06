@@ -1,8 +1,6 @@
 ﻿/*@author Eduardo Oliveira
 */
 using AventStack.ExtentReports;
-using AventStack.ExtentReports.Gherkin.Model;
-using AventStack.ExtentReports.Reporter;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using OpenQA.Selenium.Chrome;
@@ -11,24 +9,21 @@ using OpenQA.Selenium.Firefox;
 using Reqnroll;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using WebDriverManager.DriverConfigs.Impl;
+using AventStack.ExtentReports.Reporter.Config;
 
 namespace Hook_Validator
 {
     public static class Hook
     {
         private static ExtentTest featureName;
-        private static ExtentTest scenario;
+        private static AventStack.ExtentReports.ExtentTest scenario;
         private static AventStack.ExtentReports.ExtentReports extent;
         public static string getPathReport { get; set; }
         public static string getPathLocator { get; set; }
-        public static ConcurrentDictionary<string, ExtentTest> FeatureDictionary = new ConcurrentDictionary<string, ExtentTest>();
-
-        // REMOÇÃO: A maioria dos métodos de busca de driver e GetDriverExtension foram removidos.
+        public static ConcurrentDictionary<string, AventStack.ExtentReports.ExtentTest> FeatureDictionary = new ConcurrentDictionary<string, AventStack.ExtentReports.ExtentTest>();
 
         /// <summary>
         ///  Preparação do relatório e especificação dos caminhos das pastas
@@ -39,31 +34,31 @@ namespace Hook_Validator
         [BeforeTestRun]
         public static void BeforeTestRun(string pathReport, string pathLocators)
         {
-            // Usar Path.Combine para criar caminhos multiplataforma
-            pathReport = Path.DirectorySeparatorChar + pathReport + Path.DirectorySeparatorChar;
-            pathLocators = Path.DirectorySeparatorChar + pathLocators + Path.DirectorySeparatorChar;
+            // Normaliza os parâmetros e monta os paths relativos
+            pathReport = Path.DirectorySeparatorChar + pathReport.Trim(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            pathLocators = Path.DirectorySeparatorChar + pathLocators.Trim(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
 
             string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string filePathReport = Path.Combine(baseDirectory, "..", "..", "..", pathReport.TrimStart(Path.DirectorySeparatorChar));
-            string filePathLocators = Path.Combine(baseDirectory, "..", "..", "..", pathLocators.TrimStart(Path.DirectorySeparatorChar));
+            string filePathReport = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", pathReport.TrimStart(Path.DirectorySeparatorChar)));
+            string filePathLocators = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", pathLocators.TrimStart(Path.DirectorySeparatorChar)));
 
-            // Normalizar os caminhos
-            filePathReport = Path.GetFullPath(filePathReport);
-            filePathLocators = Path.GetFullPath(filePathLocators);
-
-            // Criar diretórios se não existirem
+            // Cria diretórios se não existirem
             Directory.CreateDirectory(filePathReport);
             Directory.CreateDirectory(filePathLocators);
 
-            // Limpar arquivos antigos
+            // Limpa arquivos antigos (opcional: ajusta extensões conforme necessidade)
             try
             {
-                new List<string>(Directory.GetFiles(filePathReport))
-                    .ForEach(file =>
+                foreach (var file in Directory.GetFiles(filePathReport))
+                {
+                    if (file.EndsWith(".txt", StringComparison.OrdinalIgnoreCase)
+                        || file.EndsWith(".PNG", StringComparison.OrdinalIgnoreCase)
+                        || file.EndsWith(".png", StringComparison.OrdinalIgnoreCase)
+                        || file.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (file.EndsWith(".txt") || file.EndsWith(".PNG") || file.EndsWith(".html"))
-                            File.Delete(file);
-                    });
+                        File.Delete(file);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -73,12 +68,32 @@ namespace Hook_Validator
             getPathReport = pathReport;
             getPathLocator = pathLocators;
 
-            var htmlReport = new ExtentHtmlReporter(filePathReport);
-            htmlReport.Config.Theme = AventStack.ExtentReports.Reporter.Configuration.Theme.Dark;
-            extent = new AventStack.ExtentReports.ExtentReports();
-            extent.AttachReporter(htmlReport);
+            // Caminho do arquivo index.html
+            string reportFile = Path.Combine(filePathReport, "index.html");
 
-            // Processos multiplataforma
+            // Cria o Spark Reporter
+            var spark = new AventStack.ExtentReports.Reporter.ExtentSparkReporter(reportFile);
+
+            // Habilita tema Dark
+            spark.Config.Theme = Theme.Dark;
+
+            // (Opcional) Títulos
+            //spark.Config.ReportName = "Relatório de Testes";
+            //spark.Config.DocumentTitle = "Automation Report Farmacias São João";
+
+            // Cria o ExtentReports principal
+            extent = new ExtentReports();
+
+            // Anexa o reporter
+            extent.AttachReporter(spark);
+
+
+            // (Opcional) adiciona informações do sistema no relatório
+            extent.AddSystemInfo("Machine", Environment.MachineName);
+            extent.AddSystemInfo("OS", Environment.OSVersion.ToString());
+            extent.AddSystemInfo("User", Environment.UserName);
+
+            // Mata processos de drivers antigos (mantive sua lógica)
             string[] processNames = GetDriverProcessNames();
             foreach (var processName in processNames)
             {
@@ -96,18 +111,15 @@ namespace Hook_Validator
                 }
             }
 
-            // Limpar pastas dos browsers (Não é mais necessário se a lógica de GetDriver for removida, mas mantido por segurança)
+            // Limpa pastas dos browsers (se necessário)
             string[] browserFolders = { "Chrome", "Edge", "Firefox" };
-            string baseFolderPath = AppDomain.CurrentDomain.BaseDirectory;
             foreach (var browserFolder in browserFolders)
             {
-                string browserFolderPath = Path.Combine(baseFolderPath, browserFolder);
+                string browserFolderPath = Path.Combine(baseDirectory, browserFolder);
                 try
                 {
                     if (Directory.Exists(browserFolderPath))
-                    {
                         Directory.Delete(browserFolderPath, true);
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -115,6 +127,7 @@ namespace Hook_Validator
                 }
             }
         }
+
 
         /// <summary>
         ///  É gerado um txt da classe tools para fazer o contador de imagens.
@@ -135,7 +148,7 @@ namespace Hook_Validator
         [BeforeFeature]
         public static void BeforeFeature()
         {
-            featureName = extent.CreateTest<Feature>(FeatureContext.Current.FeatureInfo.Title);
+            featureName = extent.CreateTest<AventStack.ExtentReports.Gherkin.Model.Feature>(FeatureContext.Current.FeatureInfo.Title);
             FeatureDictionary.TryAdd(FeatureContext.Current.FeatureInfo.Title, featureName);
             AddTags(featureName, FeatureContext.Current.FeatureInfo.Tags);
         }
@@ -150,13 +163,13 @@ namespace Hook_Validator
         /// <param name="headless">Modo invisível</param>
         /// <param name="device">Modo mobile apenas especificar o modelo mobile</param>
         [BeforeScenario]
-        public static void BeforeScenario(string browser, string arg, string device)
+        public static void BeforeScenario(string browser, string arg, string device, bool certificate)
         {
-            SelectBrowser(browser, arg, device);
+            SelectBrowser(browser, arg, device, certificate);
             string InBSName = FeatureContext.Current.FeatureInfo.Title;
             if (FeatureDictionary.ContainsKey(InBSName))
             {
-                scenario = FeatureDictionary[InBSName].CreateNode<Scenario>(ScenarioContext.Current.ScenarioInfo.Title);
+                scenario = FeatureDictionary[InBSName].CreateNode<AventStack.ExtentReports.Gherkin.Model.Scenario>(ScenarioContext.Current.ScenarioInfo.Title);
             }
             AddTags(scenario, ScenarioContext.Current.ScenarioInfo.Tags);
         }
@@ -185,19 +198,19 @@ namespace Hook_Validator
                 switch (step)
                 {
                     case "Given":
-                        scenario.CreateNode<Given>(ScenarioStepContext.Current.StepInfo.Text).Pass("PASSOU");
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.Given>(ScenarioStepContext.Current.StepInfo.Text).Pass("PASSOU");
                         break;
                     case "When":
-                        scenario.CreateNode<When>(ScenarioStepContext.Current.StepInfo.Text).Pass("PASSOU");
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.When>(ScenarioStepContext.Current.StepInfo.Text).Pass("PASSOU");
                         break;
                     case "And":
-                        scenario.CreateNode<And>(ScenarioStepContext.Current.StepInfo.Text).Pass("PASSOU");
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.And>(ScenarioStepContext.Current.StepInfo.Text).Pass("PASSOU");
                         break;
                     case "But":
-                        scenario.CreateNode<But>(ScenarioStepContext.Current.StepInfo.Text).Pass("PASSOU");
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.But>(ScenarioStepContext.Current.StepInfo.Text).Pass("PASSOU");
                         break;
                     case "Then":
-                        scenario.CreateNode<Then>(ScenarioStepContext.Current.StepInfo.Text).Pass("PASSOU");
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.Then>(ScenarioStepContext.Current.StepInfo.Text).Pass("PASSOU");
                         break;
                 }
             }
@@ -210,34 +223,34 @@ namespace Hook_Validator
                 switch (step)
                 {
                     case "Given" when status == TestStatus.Failed:
-                        scenario.CreateNode<Given>(ScenarioStepContext.Current.StepInfo.Text).Fail("FALHOU" + errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.Given>(ScenarioStepContext.Current.StepInfo.Text).Fail("FALHOU" + errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
                         break;
                     case "Given" when status == TestStatus.Inconclusive:
-                        scenario.CreateNode<Given>(ScenarioStepContext.Current.StepInfo.Text).Fail("INCONCLUSIVO - o elemento não foi encontrado", MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.Given>(ScenarioStepContext.Current.StepInfo.Text).Fail("INCONCLUSIVO - o elemento não foi encontrado", MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
                         break;
                     case "When" when status == TestStatus.Failed:
-                        scenario.CreateNode<When>(ScenarioStepContext.Current.StepInfo.Text).Fail("FALHOU" + errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.When>(ScenarioStepContext.Current.StepInfo.Text).Fail("FALHOU" + errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
                         break;
                     case "When" when status == TestStatus.Inconclusive:
-                        scenario.CreateNode<When>(ScenarioStepContext.Current.StepInfo.Text).Fail("INCONCLUSIVO - o elemento não foi encontrado", MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.When>(ScenarioStepContext.Current.StepInfo.Text).Fail("INCONCLUSIVO - o elemento não foi encontrado", MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
                         break;
                     case "And" when status == TestStatus.Failed:
-                        scenario.CreateNode<And>(ScenarioStepContext.Current.StepInfo.Text).Fail("FALHOU" + errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.And>(ScenarioStepContext.Current.StepInfo.Text).Fail("FALHOU" + errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
                         break;
                     case "And" when status == TestStatus.Inconclusive:
-                        scenario.CreateNode<And>(ScenarioStepContext.Current.StepInfo.Text).Fail("INCONCLUSIVO - o elemento não foi encontrado", MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.And>(ScenarioStepContext.Current.StepInfo.Text).Fail("INCONCLUSIVO - o elemento não foi encontrado", MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
                         break;
                     case "But" when status == TestStatus.Failed:
-                        scenario.CreateNode<But>(ScenarioStepContext.Current.StepInfo.Text).Fail("FALHOU" + errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.But>(ScenarioStepContext.Current.StepInfo.Text).Fail("FALHOU" + errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
                         break;
                     case "But" when status == TestStatus.Inconclusive:
-                        scenario.CreateNode<But>(ScenarioStepContext.Current.StepInfo.Text).Fail("INCONCLUSIVO - o elemento não foi encontrado", MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.But>(ScenarioStepContext.Current.StepInfo.Text).Fail("INCONCLUSIVO - o elemento não foi encontrado", MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
                         break;
                     case "Then" when status == TestStatus.Failed:
-                        scenario.CreateNode<Then>(ScenarioStepContext.Current.StepInfo.Text).Fail("FALHOU" + errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.Then>(ScenarioStepContext.Current.StepInfo.Text).Fail("FALHOU" + errorMessage, MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
                         break;
                     case "Then" when status == TestStatus.Inconclusive:
-                        scenario.CreateNode<Then>(ScenarioStepContext.Current.StepInfo.Text).Fail("INCONCLUSIVO - o elemento não foi encontrado", MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
+                        scenario.CreateNode<AventStack.ExtentReports.Gherkin.Model.Then>(ScenarioStepContext.Current.StepInfo.Text).Fail("INCONCLUSIVO - o elemento não foi encontrado", MediaEntityBuilder.CreateScreenCaptureFromBase64String(ConvertFilePathToBase64(screenShotPath)).Build());
                         break;
                 }
             }
@@ -256,7 +269,7 @@ namespace Hook_Validator
                 testNode.AssignCategory(tags);
         }
 
-        internal static void SelectBrowser(string browserType, string headless, string device)
+        internal static void SelectBrowser(string browserType, string headless, string device, bool certificate)
         {
             bool isLinux = Environment.OSVersion.Platform == PlatformID.Unix ||
                            Environment.OSVersion.Platform == PlatformID.MacOSX;
@@ -267,6 +280,13 @@ namespace Hook_Validator
                 case "Chrome":
                     ChromeOptions optionChrome = new ChromeOptions();
 
+                    // 🔥 Aceita certificados inválidos
+                    optionChrome.AcceptInsecureCertificates = certificate;
+
+                    // Remove "Chrome está sendo controlado por software"
+                    optionChrome.AddExcludedArgument("enable-automation");
+                    optionChrome.AddAdditionalOption("useAutomationExtension", false);
+
                     if (isLinux)
                     {
                         optionChrome.AddArgument("--no-sandbox");
@@ -275,14 +295,6 @@ namespace Hook_Validator
                         optionChrome.AddArgument("--disable-software-rasterizer");
                         optionChrome.AddArgument("--disable-blink-features=AutomationControlled");
                         optionChrome.AddArgument("--disable-extensions");
-                        optionChrome.AddArgument("--disable-background-networking");
-                        optionChrome.AddArgument("--disable-default-apps");
-                        optionChrome.AddArgument("--disable-sync");
-                        optionChrome.AddArgument("--metrics-recording-only");
-                        optionChrome.AddArgument("--mute-audio");
-                        optionChrome.AddArgument("--no-first-run");
-                        optionChrome.AddArgument("--safebrowsing-disable-auto-update");
-                        optionChrome.AddArgument("--disable-features=VizDisplayCompositor");
 
                         optionChrome.AddUserProfilePreference("download.default_directory", "/tmp/downloads");
                         optionChrome.AddUserProfilePreference("download.prompt_for_download", false);
@@ -292,19 +304,23 @@ namespace Hook_Validator
                     }
 
                     optionChrome.AddArgument("--disable-background-timer-throttling");
-                    optionChrome.AddArgument("--disable-backgrounding-occluded-windows");
                     optionChrome.AddArgument("--disable-renderer-backgrounding");
-                    optionChrome.AddArgument("--disable-features=TranslateUI");
                     optionChrome.AddArgument("--disable-ipc-flooding-protection");
 
+                    optionChrome.AddUserProfilePreference("credentials_enable_service", false);
+                    optionChrome.AddUserProfilePreference("profile.password_manager_enabled", false);
+                    optionChrome.AddArgument("--disable-features=PasswordLeakDetection");
+                    optionChrome.AddArgument("--disable-save-password-bubble");
+
+                    if (isWindows)
+                        optionChrome.AddArgument(@"--user-data-dir=C:\Temp\ChromeSelenium");
+                    else
+                        optionChrome.AddArgument("--user-data-dir=/tmp/chrome-selenium");
+
                     if (headless.Equals("--headless"))
-                    {
                         optionChrome.AddArgument("--headless=new");
-                    }
                     else if (!string.IsNullOrEmpty(headless))
-                    {
                         optionChrome.AddArgument(headless);
-                    }
 
                     if (!string.IsNullOrEmpty(device))
                         optionChrome.EnableMobileEmulation(device);
@@ -329,7 +345,7 @@ namespace Hook_Validator
                         service.SuppressInitialDiagnosticInformation = true;
                         service.HideCommandPromptWindow = true;
 
-                        Console.WriteLine($"Iniciando ChromeDriver...");
+                        Console.WriteLine("Iniciando ChromeDriver...");
 
                         Selenium.driver = new ChromeDriver(service, optionChrome, TimeSpan.FromSeconds(120));
 
@@ -338,26 +354,28 @@ namespace Hook_Validator
                         Selenium.driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(30);
 
                         if (isLinux)
-                        {
                             Selenium.driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
-                            Console.WriteLine("ChromeDriver iniciado com sucesso no Linux (tamanho: 1920x1080)");
-                        }
                         else
-                        {
                             Selenium.driver.Manage().Window.Maximize();
-                            Console.WriteLine("ChromeDriver iniciado com sucesso no Windows");
-                        }
+
+                        Console.WriteLine("ChromeDriver iniciado com sucesso");
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Erro ao iniciar ChromeDriver: {ex.Message}");
-                        Console.WriteLine($"Stack trace: {ex.StackTrace}");
                         throw;
                     }
                     break;
 
                 case "Edge":
                     EdgeOptions optionEdge = new EdgeOptions();
+
+                    // Aceita certificados inválidos
+                    optionEdge.AcceptInsecureCertificates = certificate;
+                    optionEdge.AddUserProfilePreference("credentials_enable_service", false);
+                    optionEdge.AddUserProfilePreference("profile.password_manager_enabled", false);
+                    optionEdge.AddArgument("--disable-features=PasswordLeakDetection");
+                    optionEdge.AddArgument("--disable-save-password-bubble");
 
                     if (isLinux)
                     {
@@ -377,72 +395,54 @@ namespace Hook_Validator
                     {
                         new WebDriverManager.DriverManager().SetUpDriver(new EdgeConfig());
                         edgeService = EdgeDriverService.CreateDefaultService();
-                        Console.WriteLine("EdgeDriver configurado via WebDriverManager (Windows)");
                     }
                     else
                     {
                         edgeService = EdgeDriverService.CreateDefaultService();
-                        Console.WriteLine("Usando EdgeDriver do PATH (Linux)");
                     }
 
                     Selenium.driver = new EdgeDriver(edgeService, optionEdge, TimeSpan.FromSeconds(120));
 
                     if (isLinux)
-                    {
                         Selenium.driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
-                        Console.WriteLine("EdgeDriver iniciado com sucesso no Linux");
-                    }
                     else
-                    {
                         Selenium.driver.Manage().Window.Maximize();
-                        Console.WriteLine("EdgeDriver iniciado com sucesso no Windows");
-                    }
+
                     break;
 
                 case "Firefox":
                     FirefoxOptions optionFirefox = new FirefoxOptions();
 
+                    // Aceita certificados inválidos
+                    optionFirefox.AcceptInsecureCertificates = certificate;
+
                     if (isLinux)
-                    {
                         optionFirefox.AddArgument("--headless");
-                    }
 
                     if (headless.Equals("--headless"))
-                    {
                         optionFirefox.AddArgument("--headless");
-                    }
 
                     FirefoxDriverService firefoxService;
                     if (isWindows)
                     {
                         new WebDriverManager.DriverManager().SetUpDriver(new FirefoxConfig());
                         firefoxService = FirefoxDriverService.CreateDefaultService();
-                        Console.WriteLine("FirefoxDriver configurado via WebDriverManager (Windows)");
                     }
                     else
                     {
                         firefoxService = FirefoxDriverService.CreateDefaultService();
-                        Console.WriteLine("Usando FirefoxDriver do PATH (Linux)");
                     }
 
                     Selenium.driver = new FirefoxDriver(firefoxService, optionFirefox, TimeSpan.FromSeconds(120));
 
                     if (isLinux)
-                    {
                         Selenium.driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
-                        Console.WriteLine("FirefoxDriver iniciado com sucesso no Linux");
-                    }
                     else
-                    {
                         Selenium.driver.Manage().Window.Maximize();
-                        Console.WriteLine("FirefoxDriver iniciado com sucesso no Windows");
-                    }
+
                     break;
             }
         }
-
-        // --- MÉTODOS REMOVIDOS ---
-        // GetChromeDriver(), GetEdgeDriver(), GetFirefoxDriver(), FindDriverFile(), GetDriverExtension()
 
         private static string[] GetDriverProcessNames()
         {

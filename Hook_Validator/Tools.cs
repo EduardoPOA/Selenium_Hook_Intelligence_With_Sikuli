@@ -423,6 +423,80 @@ namespace Hook_Validator
             return true;
         }
 
+        /// <summary>
+        /// Executa o comando de enviar utilizando SendKeys sem o element
+        /// </summary>
+        /// <param name="word">Comandos do keyboard do windows</param>
+        public static bool SendKeyToBrowser(string word)
+        {
+            Actions action = new Actions(Selenium.driver);
+
+            Dictionary<string, string> specialKeys = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { "Enter", Keys.Enter },
+        { "Tab", Keys.Tab },
+        { "Escape", Keys.Escape },
+        { "Space", Keys.Space },
+        { "Backspace", Keys.Backspace },
+        { "Delete", Keys.Delete },
+        { "Insert", Keys.Insert },
+        { "Home", Keys.Home },
+        { "End", Keys.End },
+        { "PageUp", Keys.PageUp },
+        { "PageDown", Keys.PageDown },
+        { "ArrowUp", Keys.ArrowUp },
+        { "ArrowDown", Keys.ArrowDown },
+        { "ArrowLeft", Keys.ArrowLeft },
+        { "ArrowRight", Keys.ArrowRight },
+        { "F1", Keys.F1 },
+        { "F2", Keys.F2 },
+        { "F3", Keys.F3 },
+        { "F4", Keys.F4 },
+        { "F5", Keys.F5 },
+        { "F6", Keys.F6 },
+        { "F7", Keys.F7 },
+        { "F8", Keys.F8 },
+        { "F9", Keys.F9 },
+        { "F10", Keys.F10 },
+        { "F11", Keys.F11 },
+        { "F12", Keys.F12 },
+        { "Ctrl", Keys.Control },
+        { "Control", Keys.Control },
+        { "Shift", Keys.Shift },
+        { "Alt", Keys.Alt }
+    };
+
+            // Combinação tipo: Ctrl + Shift + R
+            if (word.Contains("+"))
+            {
+                string[] keys = word.Split('+');
+                action = action.KeyDown(Keys.Null);
+
+                foreach (string k in keys)
+                {
+                    string key = k.Trim();
+                    string seleniumKey = specialKeys.ContainsKey(key) ? specialKeys[key] : key;
+
+                    action = action.SendKeys(seleniumKey);
+                }
+
+                action.Perform();
+                return true;
+            }
+
+            // Uma tecla especial sozinha
+            if (specialKeys.ContainsKey(word))
+            {
+                action.SendKeys(specialKeys[word]).Perform();
+            }
+            else
+            {
+                // Texto normal
+                action.SendKeys(word).Perform();
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Executa o comando de enviar palavra secreta do properties utilizando a SendKeys Selenium com o By Locator

@@ -5,10 +5,10 @@
   },
   "projects": {
     "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj": {
-      "version": "31.0.0",
+      "version": "35.0.0",
       "restore": {
         "projectUniqueName": "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
-        "projectName": "Super_Automation_SikuliNN",
+        "projectName": "Super_Automation_Sikuli",
         "projectPath": "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
         "packagesPath": "C:\\Users\\eduardo.silva42\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\obj\\",
@@ -61,7 +61,7 @@
             },
             "ExtentReports": {
               "target": "Package",
-              "version": "[4.1.0, )"
+              "version": "[5.0.4, )"
             },
             "Microsoft.NETCore.Platforms": {
               "target": "Package",

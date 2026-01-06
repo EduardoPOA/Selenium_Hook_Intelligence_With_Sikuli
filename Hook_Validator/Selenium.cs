@@ -28,12 +28,7 @@ namespace Hook_Validator
         /// </summary>
         public static void TearDown()
         {
-            try
-            {
-                driver.Close();
                 driver.Quit();
-            }
-            catch (Exception) { }
         }
     }
 }
