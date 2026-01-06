@@ -279,11 +279,7 @@ namespace Hook_Validator
             {
                 case "Chrome":
                     ChromeOptions optionChrome = new ChromeOptions();
-
-                    // 🔥 Aceita certificados inválidos
                     optionChrome.AcceptInsecureCertificates = certificate;
-
-                    // Remove "Chrome está sendo controlado por software"
                     optionChrome.AddExcludedArgument("enable-automation");
                     optionChrome.AddAdditionalOption("useAutomationExtension", false);
 
@@ -295,11 +291,9 @@ namespace Hook_Validator
                         optionChrome.AddArgument("--disable-software-rasterizer");
                         optionChrome.AddArgument("--disable-blink-features=AutomationControlled");
                         optionChrome.AddArgument("--disable-extensions");
-
                         optionChrome.AddUserProfilePreference("download.default_directory", "/tmp/downloads");
                         optionChrome.AddUserProfilePreference("download.prompt_for_download", false);
                         optionChrome.AddUserProfilePreference("disable-popup-blocking", true);
-
                         Console.WriteLine("Aplicando configurações específicas para Linux");
                     }
 
@@ -307,15 +301,26 @@ namespace Hook_Validator
                     optionChrome.AddArgument("--disable-renderer-backgrounding");
                     optionChrome.AddArgument("--disable-ipc-flooding-protection");
 
+                    // Configurações para desabilitar completamente o gerenciador de senhas
                     optionChrome.AddUserProfilePreference("credentials_enable_service", false);
                     optionChrome.AddUserProfilePreference("profile.password_manager_enabled", false);
+                    optionChrome.AddUserProfilePreference("profile.default_content_setting_values.notifications", 2);
+
+                    // Desabilitar alertas de senha comprometida
+                    optionChrome.AddUserProfilePreference("profile.password_manager_leak_detection", false);
+                    optionChrome.AddUserProfilePreference("safebrowsing.enabled", false);
+
+                    // Argumentos adicionais para desabilitar recursos de segurança relacionados
                     optionChrome.AddArgument("--disable-features=PasswordLeakDetection");
                     optionChrome.AddArgument("--disable-save-password-bubble");
+                    optionChrome.AddArgument("--disable-password-generation");
 
-                    if (isWindows)
-                        optionChrome.AddArgument(@"--user-data-dir=C:\Temp\ChromeSelenium");
-                    else
-                        optionChrome.AddArgument("--user-data-dir=/tmp/chrome-selenium");
+                    // Desabilitar todas as notificações
+                    optionChrome.AddArgument("--disable-notifications");
+
+                    // Definir preferências adicionais
+                    optionChrome.AddUserProfilePreference("autofill.profile_enabled", false);
+                    optionChrome.AddUserProfilePreference("autofill.credit_card_enabled", false);
 
                     if (headless.Equals("--headless"))
                         optionChrome.AddArgument("--headless=new");
@@ -328,7 +333,6 @@ namespace Hook_Validator
                     try
                     {
                         ChromeDriverService service;
-
                         if (isWindows)
                         {
                             new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
@@ -346,9 +350,7 @@ namespace Hook_Validator
                         service.HideCommandPromptWindow = true;
 
                         Console.WriteLine("Iniciando ChromeDriver...");
-
                         Selenium.driver = new ChromeDriver(service, optionChrome, TimeSpan.FromSeconds(120));
-
                         Selenium.driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
                         Selenium.driver.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(60);
                         Selenium.driver.Manage().Timeouts().AsynchronousJavaScript = TimeSpan.FromSeconds(30);
@@ -366,7 +368,6 @@ namespace Hook_Validator
                         throw;
                     }
                     break;
-
                 case "Edge":
                     EdgeOptions optionEdge = new EdgeOptions();
 

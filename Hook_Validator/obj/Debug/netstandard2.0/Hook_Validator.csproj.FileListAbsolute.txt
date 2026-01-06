@@ -10,3 +10,15 @@ C:\Users\eduardo.silva42\Desktop\Selenium_Hook_Intelligence_With_Sikuli\Hook_Val
 C:\Users\eduardo.silva42\Desktop\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\obj\Debug\netstandard2.0\Hook_Validator.sourcelink.json
 C:\Users\eduardo.silva42\Desktop\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\obj\Debug\netstandard2.0\Hook_Validator.dll
 C:\Users\eduardo.silva42\Desktop\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\obj\Debug\netstandard2.0\Hook_Validator.pdb
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\bin\Debug\netstandard2.0\Dlls\JNI.dll
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\bin\Debug\netstandard2.0\Hook_Validator.deps.json
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\bin\Debug\netstandard2.0\Hook_Validator.dll
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\bin\Debug\netstandard2.0\Hook_Validator.pdb
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\obj\Debug\netstandard2.0\Hook_Validator.csproj.AssemblyReference.cache
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\obj\Debug\netstandard2.0\Hook_Validator.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\obj\Debug\netstandard2.0\Hook_Validator.AssemblyInfoInputs.cache
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\obj\Debug\netstandard2.0\Hook_Validator.AssemblyInfo.cs
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\obj\Debug\netstandard2.0\Hook_Validator.csproj.CoreCompileInputs.cache
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\obj\Debug\netstandard2.0\Hook_Validator.sourcelink.json
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\obj\Debug\netstandard2.0\Hook_Validator.dll
+C:\Users\eduar\OneDrive\Área de Trabalho\Git_Hub\Selenium_Hook_Intelligence_With_Sikuli\Hook_Validator\obj\Debug\netstandard2.0\Hook_Validator.pdb

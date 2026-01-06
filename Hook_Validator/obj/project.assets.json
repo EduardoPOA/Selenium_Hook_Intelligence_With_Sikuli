@@ -2231,23 +2231,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\eduardo.silva42\\.nuget\\packages\\": {},
+    "C:\\Users\\eduar\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
-    "version": "35.0.0",
+    "version": "36.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
+      "projectUniqueName": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Git_Hub\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
       "projectName": "Super_Automation_Sikuli",
-      "projectPath": "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
-      "packagesPath": "C:\\Users\\eduardo.silva42\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\obj\\",
+      "projectPath": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Git_Hub\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
+      "packagesPath": "C:\\Users\\eduar\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Git_Hub\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\eduardo.silva42\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\eduar\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -2256,7 +2256,8 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Users\\eduardo.silva42\\Desktop\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\bin\\Debug": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
+        "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Git_Hub\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\bin\\Debug": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -2275,7 +2276,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "10.0.100"
     },
     "frameworks": {
       "netstandard2.0": {
@@ -2343,7 +2344,7 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101\\RuntimeIdentifierGraph.json"
       }
     }
   }
