@@ -9,6 +9,7 @@ using Reqnroll;
 using SeleniumExtras.WaitHelpers;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -16,26 +17,29 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace Hook_Validator
 {
     public class Tools
-    {
+    {     
+        private static string keyAttribute { get; set; }
+        private static string byAttribute { get; set; }
+        private static string valueAttribute { get; set; }
+        private static string getCount { get; set; }
+        private static int count { get; set; }
+        private static string getCorrection { get; set; }
+        private static By newByValue { get; set; }
+
         private const int TIMEOUT_CONST = 10;
         private const int TIMEOUT_DELAY = 200;
-
-        private static string keyAttribute { get; set; }
-
-        private static string byAttribute { get; set; }
-
-        private static string valueAttribute { get; set; }
-
-        private static string getCount { get; set; }
-
-        private static int count { get; set; }
-
-        private static string getCorrection { get; set; }
+        private static string pageObjectsPath = "";
+        private static string elementSearchPath = "";
+        private static readonly object xmlLock = new object();
+        private static ManualResetEvent pauseEvent = new ManualResetEvent(true);
+        private static bool isProcessingCommand = false;
 
         // Paths multiplataforma
         private static string filePath = Path.GetFullPath(Path.Combine(
@@ -46,26 +50,24 @@ namespace Hook_Validator
             Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
             "..", "..", "..", Hook.getPathLocator.TrimStart(Path.DirectorySeparatorChar)));
 
-        private static By newByValue { get; set; }
-
+        private static string featuresPath = Path.GetFullPath(Path.Combine(
+           Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
+           "..", "..", "..", ".."));
 
         /// <summary>
         /// Navega para a página da url
         /// </summary>
         public static void OpenPage(string url)
         {
-            Stopwatch stopWatch = Stopwatch.StartNew();
-            try
-            {
-                Selenium.driver.Navigate().GoToUrl(url);
-                stopWatch.Stop();
-            }
-            catch (Exception)
-            {
-                if (stopWatch.IsRunning)
-                    stopWatch.Stop();
-            }
-        }
+            Selenium.driver.Navigate().GoToUrl(url);
+            var wait = new WebDriverWait(Selenium.driver, TimeSpan.FromSeconds(30));
+            wait.Until(driver =>
+                ((IJavaScriptExecutor)driver)
+                    .ExecuteScript("return document.readyState")
+                    .Equals("complete")
+            );
+            Execute();
+        }        
 
         /// <summary>
         /// Recarrega a página
@@ -504,7 +506,7 @@ namespace Hook_Validator
         /// <param name="locator">Locator referente o elemento do arquivo xml</param>
         public static bool SendSecretToElement(string locator, string word)
         {
-            string keyValue = stringSecret(word);
+            string keyValue = StringSecret(word);
             IWebElement element = GetLocatorIWebElement(locator);
             ValidateElementVisible(element);
             element.SendKeys(keyValue);
@@ -517,7 +519,7 @@ namespace Hook_Validator
         /// <param name="element">Element referente o elemento instanciado pelo Selenium</param>
         public static bool SendSecretToElement(IWebElement element, string word)
         {
-            string keyValue = stringSecret(word);
+            string keyValue = StringSecret(word);
             ValidateElementVisible(element);
             element.SendKeys(keyValue);
             return true;
@@ -1225,7 +1227,7 @@ namespace Hook_Validator
         /// </summary>
         /// <param name="locator">Locator referente o elemento do arquivo xml</param>
         public static IWebElement WaitElement(string locator, int timeout = TIMEOUT_CONST)
-        {
+        {            
             By byLocator = GetLocator(locator);
             WebDriverWait wait = new WebDriverWait(Selenium.driver, TimeSpan.FromSeconds(timeout));
             IWebElement element = wait.Until(ExpectedConditions.ElementIsVisible(byLocator));
@@ -1286,52 +1288,113 @@ namespace Hook_Validator
         ///   - Features
         ///   - Steps
         /// </summary>
-        public static void createTemplate(string folderName)
+        public static void CreateTemplate(string folderName)
         {
-            var solutionName = Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+            var solutionName = Path.GetFileName(
+                System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+
             string splitName = solutionName.Split('.')[0];
 
-            // Path multiplataforma para o arquivo .csproj
             string baseDir = Path.GetFullPath(Path.Combine(
                 Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
                 "..", "..", ".."));
+
             string filename = Path.Combine(baseDir, splitName + ".csproj");
             string createFolder = baseDir + Path.DirectorySeparatorChar;
 
             XmlDocument doc = new XmlDocument();
             doc.Load(filename);
-            XmlDocumentFragment docFrag = doc.CreateDocumentFragment();
-            docFrag.InnerXml = "<ItemGroup> </ItemGroup>";
-            doc.DocumentElement.AppendChild(docFrag);
-            XmlNodeList nosItemGroup = doc.GetElementsByTagName("ItemGroup");
-            foreach (XmlNode no in nosItemGroup)
-            {
-                if (no.FirstChild.Name == "#whitespace")
-                {
-                    List<string> folders = new List<string>();
-                    folders.Add("_Pages");
-                    folders.Add("_Locators");
-                    folders.Add("_Report");
-                    folders.Add("_Resources");
-                    folders.Add("_Features");
-                    folders.Add("_Steps");
-                    foreach (string item in folders)
-                    {
-                        XmlNode newNo = doc.CreateElement("Folder", no.NamespaceURI);
-                        XmlAttribute newAttrib = doc.CreateAttribute("Include");
-                        newAttrib.Value = "" + folderName + item + Path.DirectorySeparatorChar;
-                        newNo.Attributes.Append(newAttrib);
-                        no.AppendChild(newNo);
-                        Directory.CreateDirectory(Path.Combine(createFolder, folderName + item));
-                    }
-                }
-            }
-            doc.Save(filename);
-            List<string> listCsproj = File.ReadAllLines(filename).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToList();
-            List<string> replaceOutputType = listCsproj.Select(x => x.Replace("WinExe", "Library")).ToList();
-            File.WriteAllLines(filename, replaceOutputType);
-        }
 
+            // ===============================
+            // CRIA FOLDERS NO CSPROJ
+            // ===============================
+            XmlNode itemGroupFolders = doc.SelectSingleNode("//ItemGroup[Folder]");
+
+            if (itemGroupFolders == null)
+            {
+                itemGroupFolders = doc.CreateElement("ItemGroup", doc.DocumentElement.NamespaceURI);
+                doc.DocumentElement.AppendChild(itemGroupFolders);
+            }
+
+            List<string> folders = new List<string>
+    {
+        "_Pages",
+        "_Locators",
+        "_Report",
+        "_Resources",
+        "_Features",
+        "_Steps"
+    };
+
+            foreach (string item in folders)
+            {
+                string includePath = folderName + item + Path.DirectorySeparatorChar;
+
+                bool exists = itemGroupFolders.SelectSingleNode(
+                    $"Folder[@Include='{includePath}']") != null;
+
+                if (!exists)
+                {
+                    XmlElement folderNode = doc.CreateElement("Folder", doc.DocumentElement.NamespaceURI);
+                    folderNode.SetAttribute("Include", includePath);
+                    itemGroupFolders.AppendChild(folderNode);
+                }
+
+                Directory.CreateDirectory(Path.Combine(createFolder, folderName + item));
+            }
+
+            // ===============================
+            // CRIA PageObjects.xml
+            // ===============================
+            string locatorsPath = Path.Combine(createFolder, folderName + "_Locators");
+            Directory.CreateDirectory(locatorsPath);
+
+            string pageObjectsFile = Path.Combine(locatorsPath, "PageObjects.xml");
+
+            if (!File.Exists(pageObjectsFile))
+            {
+                File.WriteAllText(pageObjectsFile,
+        @"<?xml version=""1.0"" encoding=""utf-8""?>
+<locators>
+  <element key="""" by="""" value="""" baseValue="""" />
+</locators>");
+            }
+
+            // ===============================
+            // ATUALIZA CSPROJ (None + Copy)
+            // ===============================
+            string updateValue = $"{folderName}_Locators{Path.DirectorySeparatorChar}PageObjects.xml";
+
+            XmlNode noneExists = doc.SelectSingleNode(
+                $"//None[@Update='{updateValue}']");
+
+            if (noneExists == null)
+            {
+                XmlElement itemGroupNone = doc.CreateElement("ItemGroup", doc.DocumentElement.NamespaceURI);
+
+                XmlElement noneNode = doc.CreateElement("None", doc.DocumentElement.NamespaceURI);
+                noneNode.SetAttribute("Update", updateValue);
+
+                XmlElement copyNode = doc.CreateElement("CopyToOutputDirectory", doc.DocumentElement.NamespaceURI);
+                copyNode.InnerText = "PreserveNewest";
+
+                noneNode.AppendChild(copyNode);
+                itemGroupNone.AppendChild(noneNode);
+
+                doc.DocumentElement.AppendChild(itemGroupNone);
+            }
+
+            doc.Save(filename);
+
+            // ===============================
+            // FORÇA WinExe -> Library
+            // ===============================
+            var lines = File.ReadAllLines(filename)
+                .Where(l => !string.IsNullOrWhiteSpace(l))
+                .Select(l => l.Replace("WinExe", "Library"));
+
+            File.WriteAllLines(filename, lines);
+        }
         /// <summary>
         ///  Executa o WaiElement com parametro string do locator com padrão da constante 10 segundos
         ///  Poderá executar qualquer método Selenium acompanhado.
@@ -1498,6 +1561,7 @@ namespace Hook_Validator
         /// <param name="locator">Locator referente o elemento do arquivo xml</param>
         public static By GetLocator(string locator)
         {
+            Execute();
             string featureName = FeatureContext.Current.FeatureInfo.Title;
 
             // Garantir que o diretório existe
@@ -2055,7 +2119,7 @@ decryptor, CryptoStreamMode.Read))
             }
         }
 
-        public static string stringSecret(string value)
+        public static string StringSecret(string value)
         {
             string baseDir = Path.GetFullPath(Path.Combine(
                 Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
@@ -2290,6 +2354,466 @@ decryptor, CryptoStreamMode.Read))
             {
                 getCount = load.ReadLine();
             }
+        }
+        private static CancellationTokenSource shutdownToken = new CancellationTokenSource();
+
+        private static void Execute()
+        {
+            var xmlFiles = Directory.GetFiles(pathXml, "*.xml", SearchOption.TopDirectoryOnly);
+            if (xmlFiles.Length > 0)
+            {
+                pageObjectsPath = xmlFiles[0];
+            }
+
+            elementSearchPath = FindElementSearchFile();
+
+            // Thread watchdog para reinjeção
+            var watchdog = new Thread(() => VisualSearchWatchdog(Hook.getDriver));
+            watchdog.IsBackground = true;
+            watchdog.Start();
+
+            // Thread para processar comandos do JavaScript
+            var commandProcessor = new Thread(() => ProcessCommands(Hook.getDriver));
+            commandProcessor.IsBackground = true;
+            commandProcessor.Start();
+        }
+
+        /// <summary>
+        /// Encerra as threads de injeção e processamento de comandos
+        /// </summary>
+        public static void Shutdown()
+        {
+            shutdownToken.Cancel();
+        }
+        private static string FindElementSearchFile()
+        {
+            // Pega a pasta onde a DLL do plugin (ou o executável) está rodando
+            string assemblyDir = AppDomain.CurrentDomain.BaseDirectory;
+            string filePath = Path.Combine(assemblyDir, "ElementSearch.js");
+
+            if (File.Exists(filePath))
+                return filePath;
+
+            // Fallback caso o BaseDirectory falhe (comum em alguns ambientes de teste)
+            string codeBase = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string binDir = Path.GetDirectoryName(codeBase);
+            filePath = Path.Combine(binDir, "ElementSearch.js");
+
+            return File.Exists(filePath) ? filePath : null;
+        }
+        private static List<string> FindFeatureFiles()
+        {
+            return Directory.Exists(featuresPath)
+                ? Directory.GetFiles(featuresPath, "*.feature", SearchOption.AllDirectories)
+                    .Select(Path.GetFileName)
+                    .Distinct()
+                    .OrderBy(name => name)
+                    .ToList()
+                : new List<string>();
+        }
+        private static ConcurrentQueue<string> commandQueue = new ConcurrentQueue<string>();
+        private static bool isProcessing = false;
+
+        private static void ProcessCommands(IWebDriver driver)
+        {
+            var js = (IJavaScriptExecutor)driver;
+
+            while (!shutdownToken.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    var json = js.ExecuteScript(@"
+                if (!Array.isArray(document.Automationpr_command) || document.Automationpr_command.length === 0)
+                    return null;
+
+                var cmds = JSON.stringify(document.Automationpr_command);
+                document.Automationpr_command = [];
+                return cmds;
+            ");
+
+                    if (json != null)
+                    {
+                        Task.Run(() => ProcessCommandList(json.ToString(), driver));
+                    }
+                }
+                catch (Exception ex) { }
+
+                Thread.Sleep(100);
+            }
+        }
+        private static void ProcessCommandList(string jsonCommands, IWebDriver driver)
+        {
+            try
+            {
+                var commands = Newtonsoft.Json.JsonConvert.DeserializeObject<List<dynamic>>(jsonCommands);
+
+                foreach (var cmd in commands)
+                {
+                    ProcessSingleCommand(cmd, driver);
+                }
+            }
+            catch (Exception ex) { }
+        }
+
+        private static void ProcessSingleCommand(dynamic cmd, IWebDriver driver)
+        {
+            try
+            {
+                if (cmd.Command == "AddElement")
+                {
+                    string elementKey = cmd.ElementCodeName?.ToString();
+                    string locatorType = cmd.SelectedLocatorType?.ToString();
+                    string locatorValue = cmd.SelectedLocatorValue?.ToString();
+
+                    if (string.IsNullOrEmpty(elementKey) ||
+                        string.IsNullOrEmpty(locatorType) ||
+                        string.IsNullOrEmpty(locatorValue))
+                    {
+                        return;
+                    }
+
+                    locatorValue = System.Net.WebUtility.HtmlDecode(locatorValue);
+                    if (locatorType == "xpath" || locatorType == "css")
+                        locatorValue = locatorValue.Replace("\"", "'");
+
+                    AddElementToPageObjects(elementKey, locatorType, locatorValue);
+                }
+            }
+            catch (Exception ex) { }
+        }
+        private static void AddElementToPageObjects(string elementKey, string byType, string value)
+        {
+            lock (xmlLock)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(pageObjectsPath) || !File.Exists(pageObjectsPath))
+                    {
+                        Console.WriteLine($"[XML ERRO] Arquivo não encontrado!");
+                        return;
+                    }
+
+                    // Carrega XML
+                    XDocument doc = XDocument.Load(pageObjectsPath);
+                    XElement locators = doc.Element("locators");
+
+                    if (locators == null)
+                    {
+                        return;
+                    }
+
+                    // Verifica se já existe
+                    var existing = locators.Elements("element")
+                        .FirstOrDefault(e => e.Attribute("key")?.Value == elementKey);
+
+                    if (existing != null)
+                    {
+                        existing.SetAttributeValue("by", byType);
+                        existing.SetAttributeValue("value", value);
+                        existing.SetAttributeValue("baseValue", "");
+                    }
+                    else
+                    {
+                        XElement newElement = new XElement("element",
+                            new XAttribute("key", elementKey),
+                            new XAttribute("by", byType),
+                            new XAttribute("value", value),
+                            new XAttribute("baseValue", "")
+                        );
+
+                        // Adiciona no final
+                        locators.Add(newElement);
+                    }
+
+                    // Salva
+                    SaveXmlWithFormatting(doc);
+                }
+                catch (Exception ex) { }
+            }
+        }
+
+        /// <summary>
+        /// Salva o XML com formatação adequada
+        /// </summary>
+        private static void SaveXmlWithFormatting(XDocument doc)
+        {
+            try
+            {
+                var utf8WithoutBom = new System.Text.UTF8Encoding(false);
+
+                // Garante <locators>
+                var root = doc.Element("locators");
+                if (root == null)
+                    return;
+
+                // Lê todos os elementos existentes
+                var existingElements = root.Elements("element").ToList();
+
+                // Captura elemento vazio (se existir)
+                var emptyElement = existingElements.FirstOrDefault(e =>
+                    string.IsNullOrWhiteSpace((string)e.Attribute("key")) &&
+                    string.IsNullOrWhiteSpace((string)e.Attribute("by")) &&
+                    string.IsNullOrWhiteSpace((string)e.Attribute("value")) &&
+                    string.IsNullOrWhiteSpace((string)e.Attribute("baseValue"))
+                );
+
+                // Filtra apenas elementos não vazios
+                var validElements = existingElements
+                    .Where(e =>
+                        !string.IsNullOrWhiteSpace((string)e.Attribute("key")) ||
+                        !string.IsNullOrWhiteSpace((string)e.Attribute("by")) ||
+                        !string.IsNullOrWhiteSpace((string)e.Attribute("value")) ||
+                        !string.IsNullOrWhiteSpace((string)e.Attribute("baseValue"))
+                    )
+                    .Select(e => new
+                    {
+                        Element = e,
+                        Key = (string)e.Attribute("key") ?? "",
+                        Feature = ((string)e.Attribute("key") ?? "").Split('.')[0]
+                    })
+                    .OrderBy(e => e.Feature)
+                    .ThenBy(e => e.Key)
+                    .ToList();
+
+                // Limpa o XML
+                root.RemoveNodes();
+
+                string lastFeature = null;
+
+                // Reinsere elementos organizados
+                foreach (var item in validElements)
+                {
+                    if (lastFeature != item.Feature)
+                    {
+                        lastFeature = item.Feature;
+
+                        root.Add(new XComment(
+                            " =====================================================\n" +
+                            $" Feature: {item.Feature}\n" +
+                            " ====================================================="
+                        ));
+                    }
+
+                    root.Add(new XElement(item.Element));
+                }
+
+                // Linha em branco antes do elemento vazio
+                root.Add(new XText("\n  "));
+
+                // Elemento vazio SEMPRE como último
+                root.Add(
+                    emptyElement != null
+                        ? new XElement(emptyElement)
+                        : new XElement("element",
+                            new XAttribute("key", ""),
+                            new XAttribute("by", ""),
+                            new XAttribute("value", ""),
+                            new XAttribute("baseValue", "")
+                        )
+                );
+
+                // 🔹 FORÇA quebra de linha antes do </locators>
+                root.Add(new XText("\n"));
+
+                var settings = new XmlWriterSettings
+                {
+                    Indent = true,
+                    IndentChars = "  ",
+                    NewLineChars = "\r\n",
+                    Encoding = utf8WithoutBom,
+                    OmitXmlDeclaration = false
+                };
+
+                using (var writer = XmlWriter.Create(pageObjectsPath, settings))
+                {
+                    doc.Save(writer);
+                }
+            }
+            catch
+            {
+                // Silencioso por design
+            }
+        }
+
+        /// <summary>
+        /// Salva o XML com formatação adequada para a classe Hook
+        /// </summary>
+        public static void SaveXmlWithFormattingForHook(string filePath)
+        {
+            try
+            {
+                var utf8WithoutBom = new System.Text.UTF8Encoding(false);
+
+                // Lê conteúdo original
+                string originalContent = File.ReadAllText(filePath);
+
+                // Normaliza elementos mal formados
+                string correctedContent = originalContent
+                    .Replace("<element ", "\r\n  <element ")
+                    .Replace("\" base=\"value\">", "\" base=\"value\" />")
+                    .Replace("\" baseValue=\"\" />", "\" baseValue=\"\" />\r\n");
+
+                // Garante <locators>
+                if (!correctedContent.Contains("<locators>"))
+                    correctedContent = "<locators>\r\n" + correctedContent;
+
+                if (!correctedContent.Contains("</locators>"))
+                    correctedContent = correctedContent.TrimEnd() + "\r\n</locators>";
+
+                // Arquivo temporário
+                string tempPath = Path.GetTempFileName();
+                File.WriteAllText(tempPath, correctedContent, utf8WithoutBom);
+
+                var doc = XDocument.Load(tempPath);
+                var root = doc.Element("locators");
+                if (root == null) return;
+
+                var existingElements = root.Elements("element").ToList();
+
+                // Captura elemento vazio (se existir)
+                var emptyElement = existingElements.FirstOrDefault(e =>
+                    string.IsNullOrWhiteSpace((string)e.Attribute("key")) &&
+                    string.IsNullOrWhiteSpace((string)e.Attribute("by")) &&
+                    string.IsNullOrWhiteSpace((string)e.Attribute("value")) &&
+                    string.IsNullOrWhiteSpace((string)e.Attribute("baseValue"))
+                );
+
+                // Filtra apenas elementos válidos (não vazios)
+                var validElements = existingElements
+                    .Where(e =>
+                        !string.IsNullOrWhiteSpace((string)e.Attribute("key")) ||
+                        !string.IsNullOrWhiteSpace((string)e.Attribute("by")) ||
+                        !string.IsNullOrWhiteSpace((string)e.Attribute("value")) ||
+                        !string.IsNullOrWhiteSpace((string)e.Attribute("baseValue"))
+                    )
+                    .Select(e => new
+                    {
+                        Element = e,
+                        Key = (string)e.Attribute("key") ?? "",
+                        Feature = ((string)e.Attribute("key") ?? "").Split('.')[0]
+                    })
+                    .OrderBy(e => e.Feature)
+                    .ThenBy(e => e.Key)
+                    .ToList();
+
+                // Limpa nós
+                root.RemoveNodes();
+
+                string lastFeature = null;
+
+                // Recria XML organizado
+                foreach (var item in validElements)
+                {
+                    if (lastFeature != item.Feature)
+                    {
+                        lastFeature = item.Feature;
+                        root.Add(new XComment(
+                            " =====================================================\n" +
+                            $" Feature: {item.Feature}\n" +
+                            " ====================================================="
+                        ));
+                    }
+
+                    root.Add(new XElement(item.Element));
+                }
+
+                // Garante elemento vazio SEMPRE como último
+                root.Add(new XText("\n  "));
+
+                root.Add(
+                    emptyElement != null
+                        ? new XElement(emptyElement)
+                        : new XElement("element",
+                            new XAttribute("key", ""),
+                            new XAttribute("by", ""),
+                            new XAttribute("value", ""),
+                            new XAttribute("baseValue", "")
+                        )
+                );
+
+                var settings = new XmlWriterSettings
+                {
+                    Indent = true,
+                    IndentChars = "  ",
+                    NewLineHandling = NewLineHandling.Replace,
+                    NewLineChars = "\r\n",
+                    Encoding = utf8WithoutBom,
+                    OmitXmlDeclaration = true
+                };
+
+                using (var writer = XmlWriter.Create(filePath, settings))
+                {
+                    doc.Save(writer);
+                }
+
+                // Pós-processamento mínimo
+                string finalContent = File.ReadAllText(filePath);
+
+                if (!finalContent.Contains("\r\n</locators>"))
+                    finalContent = finalContent.Replace("</locators>", "\r\n</locators>");
+
+                File.WriteAllText(filePath, finalContent, utf8WithoutBom);
+
+                File.Delete(tempPath);
+            }
+            catch
+            {
+                // Silencioso por design
+            }
+        }
+        private static void VisualSearchWatchdog(IWebDriver driver)
+        {
+            int injectionCount = 0;
+
+            while (!shutdownToken.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    // Injeta a cada 5 segundos (para manter sempre ativo)
+                    if (injectionCount % 10 == 0) // 10 * 500ms = 5 segundos
+                    {
+                        EnsureVisualSearchInjected(driver);
+                    }
+
+                    injectionCount++;
+                }
+                catch
+                {
+                    // Ignora erros
+                }
+
+                Thread.Sleep(500);
+            }
+        }
+        private static void EnsureVisualSearchInjected(IWebDriver driver)
+        {
+            try
+            {
+                var js = (IJavaScriptExecutor)driver;
+
+                // Primeiro define as features
+                js.ExecuteScript(
+                    "window.availableFeatures = arguments[0];",
+                    FindFeatureFiles()
+                );
+
+                // Depois injeta o script
+                string script = File.ReadAllText(elementSearchPath);
+                js.ExecuteScript(script);
+
+                // ✅ VALIDAÇÃO: Verifica se a injeção funcionou
+                var isInjected = js.ExecuteScript(@"
+            return typeof window.AutomationPR_ElementSearch !== 'undefined' && 
+                   typeof window.AutomationPR_ElementSearch.init === 'function';
+        ");
+
+                // Se não injetou, força novamente
+                if (isInjected == null || !(bool)isInjected)
+                {
+                    js.ExecuteScript(script); // Força reinjeção imediata
+                }
+            }
+            catch (Exception ex) { }
         }
     }
 }

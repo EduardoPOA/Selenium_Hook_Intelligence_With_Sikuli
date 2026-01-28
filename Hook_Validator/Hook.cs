@@ -1,8 +1,10 @@
 ﻿/*@author Eduardo Oliveira
 */
 using AventStack.ExtentReports;
+using AventStack.ExtentReports.Reporter.Config;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
@@ -12,7 +14,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using WebDriverManager.DriverConfigs.Impl;
-using AventStack.ExtentReports.Reporter.Config;
 
 namespace Hook_Validator
 {
@@ -21,6 +22,7 @@ namespace Hook_Validator
         private static ExtentTest featureName;
         private static AventStack.ExtentReports.ExtentTest scenario;
         private static AventStack.ExtentReports.ExtentReports extent;
+        public static IWebDriver getDriver;
         public static string getPathReport { get; set; }
         public static string getPathLocator { get; set; }
         public static ConcurrentDictionary<string, AventStack.ExtentReports.ExtentTest> FeatureDictionary = new ConcurrentDictionary<string, AventStack.ExtentReports.ExtentTest>();
@@ -67,7 +69,8 @@ namespace Hook_Validator
 
             getPathReport = pathReport;
             getPathLocator = pathLocators;
-
+            string fileLocator = Path.Combine(filePathLocators, "PageObjects.xml");
+            Tools.SaveXmlWithFormattingForHook(fileLocator);
             // Caminho do arquivo index.html
             string reportFile = Path.Combine(filePathReport, "index.html");
 
@@ -180,6 +183,7 @@ namespace Hook_Validator
         [AfterScenario]
         public static void AfterScenario()
         {
+            Tools.Shutdown();
             Selenium.TearDown();
         }
 
@@ -279,54 +283,58 @@ namespace Hook_Validator
             {
                 case "Chrome":
                     ChromeOptions optionChrome = new ChromeOptions();
+
                     optionChrome.AcceptInsecureCertificates = certificate;
+
+                    // Anti-automation
                     optionChrome.AddExcludedArgument("enable-automation");
                     optionChrome.AddAdditionalOption("useAutomationExtension", false);
+                    optionChrome.AddArgument("--disable-blink-features=AutomationControlled");
 
+                    // Performance / estabilidade
+                    optionChrome.AddArgument("--disable-background-timer-throttling");
+                    optionChrome.AddArgument("--disable-renderer-backgrounding");
+                    optionChrome.AddArgument("--disable-ipc-flooding-protection");
+
+                    // Linux hardening
                     if (isLinux)
                     {
                         optionChrome.AddArgument("--no-sandbox");
                         optionChrome.AddArgument("--disable-dev-shm-usage");
                         optionChrome.AddArgument("--disable-gpu");
                         optionChrome.AddArgument("--disable-software-rasterizer");
-                        optionChrome.AddArgument("--disable-blink-features=AutomationControlled");
-                        optionChrome.AddArgument("--disable-extensions");
-                        optionChrome.AddUserProfilePreference("download.default_directory", "/tmp/downloads");
-                        optionChrome.AddUserProfilePreference("download.prompt_for_download", false);
-                        optionChrome.AddUserProfilePreference("disable-popup-blocking", true);
-                        Console.WriteLine("Aplicando configurações específicas para Linux");
                     }
 
-                    optionChrome.AddArgument("--disable-background-timer-throttling");
-                    optionChrome.AddArgument("--disable-renderer-backgrounding");
-                    optionChrome.AddArgument("--disable-ipc-flooding-protection");
+                    // 🔥 DOWNLOADS → BIN (PONTO-CHAVE)
+                    string binPath = AppContext.BaseDirectory;
 
-                    // Configurações para desabilitar completamente o gerenciador de senhas
+                    Directory.CreateDirectory(binPath);
+
+                    optionChrome.AddUserProfilePreference("download.default_directory", binPath);
+                    optionChrome.AddUserProfilePreference("download.prompt_for_download", false);
+                    optionChrome.AddUserProfilePreference("download.directory_upgrade", true);
+                    optionChrome.AddUserProfilePreference("profile.default_content_settings.popups", 0);
+                    optionChrome.AddUserProfilePreference("safebrowsing.enabled", true);
+
+                    // Senhas / autofill / notificações
                     optionChrome.AddUserProfilePreference("credentials_enable_service", false);
                     optionChrome.AddUserProfilePreference("profile.password_manager_enabled", false);
-                    optionChrome.AddUserProfilePreference("profile.default_content_setting_values.notifications", 2);
-
-                    // Desabilitar alertas de senha comprometida
                     optionChrome.AddUserProfilePreference("profile.password_manager_leak_detection", false);
-                    optionChrome.AddUserProfilePreference("safebrowsing.enabled", false);
-
-                    // Argumentos adicionais para desabilitar recursos de segurança relacionados
-                    optionChrome.AddArgument("--disable-features=PasswordLeakDetection");
-                    optionChrome.AddArgument("--disable-save-password-bubble");
-                    optionChrome.AddArgument("--disable-password-generation");
-
-                    // Desabilitar todas as notificações
-                    optionChrome.AddArgument("--disable-notifications");
-
-                    // Definir preferências adicionais
                     optionChrome.AddUserProfilePreference("autofill.profile_enabled", false);
                     optionChrome.AddUserProfilePreference("autofill.credit_card_enabled", false);
 
+                    optionChrome.AddArgument("--disable-save-password-bubble");
+                    optionChrome.AddArgument("--disable-password-generation");
+                    optionChrome.AddArgument("--disable-notifications");
+                    optionChrome.AddArgument("--disable-features=PasswordLeakDetection");
+
+                    // Headless
                     if (headless.Equals("--headless"))
                         optionChrome.AddArgument("--headless=new");
                     else if (!string.IsNullOrEmpty(headless))
                         optionChrome.AddArgument(headless);
 
+                    // Mobile
                     if (!string.IsNullOrEmpty(device))
                         optionChrome.EnableMobileEmulation(device);
 
@@ -359,8 +367,7 @@ namespace Hook_Validator
                             Selenium.driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
                         else
                             Selenium.driver.Manage().Window.Maximize();
-
-                        Console.WriteLine("ChromeDriver iniciado com sucesso");
+                        getDriver = Selenium.driver;
                     }
                     catch (Exception ex)
                     {
@@ -408,7 +415,7 @@ namespace Hook_Validator
                         Selenium.driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
                     else
                         Selenium.driver.Manage().Window.Maximize();
-
+                    getDriver = Selenium.driver;
                     break;
 
                 case "Firefox":
@@ -440,7 +447,7 @@ namespace Hook_Validator
                         Selenium.driver.Manage().Window.Size = new System.Drawing.Size(1920, 1080);
                     else
                         Selenium.driver.Manage().Window.Maximize();
-
+                    getDriver = Selenium.driver;
                     break;
             }
         }
