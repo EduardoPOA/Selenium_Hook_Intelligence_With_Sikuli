@@ -2540,15 +2540,12 @@ decryptor, CryptoStreamMode.Read))
             try
             {
                 var utf8WithoutBom = new System.Text.UTF8Encoding(false);
-
                 // Garante <locators>
                 var root = doc.Element("locators");
                 if (root == null)
                     return;
-
                 // Lê todos os elementos existentes
                 var existingElements = root.Elements("element").ToList();
-
                 // Captura elemento vazio (se existir)
                 var emptyElement = existingElements.FirstOrDefault(e =>
                     string.IsNullOrWhiteSpace((string)e.Attribute("key")) &&
@@ -2556,7 +2553,6 @@ decryptor, CryptoStreamMode.Read))
                     string.IsNullOrWhiteSpace((string)e.Attribute("value")) &&
                     string.IsNullOrWhiteSpace((string)e.Attribute("baseValue"))
                 );
-
                 // Filtra apenas elementos não vazios
                 var validElements = existingElements
                     .Where(e =>
@@ -2574,32 +2570,25 @@ decryptor, CryptoStreamMode.Read))
                     .OrderBy(e => e.Feature)
                     .ThenBy(e => e.Key)
                     .ToList();
-
                 // Limpa o XML
                 root.RemoveNodes();
-
                 string lastFeature = null;
-
                 // Reinsere elementos organizados
                 foreach (var item in validElements)
                 {
                     if (lastFeature != item.Feature)
                     {
                         lastFeature = item.Feature;
-
                         root.Add(new XComment(
                             " =====================================================\n" +
                             $" Feature: {item.Feature}\n" +
                             " ====================================================="
                         ));
                     }
-
                     root.Add(new XElement(item.Element));
                 }
-
                 // Linha em branco antes do elemento vazio
                 root.Add(new XText("\n  "));
-
                 // Elemento vazio SEMPRE como último
                 root.Add(
                     emptyElement != null
@@ -2611,19 +2600,16 @@ decryptor, CryptoStreamMode.Read))
                             new XAttribute("baseValue", "")
                         )
                 );
-
                 // 🔹 FORÇA quebra de linha antes do </locators>
                 root.Add(new XText("\n"));
-
                 var settings = new XmlWriterSettings
                 {
                     Indent = true,
                     IndentChars = "  ",
                     NewLineChars = "\r\n",
                     Encoding = utf8WithoutBom,
-                    OmitXmlDeclaration = false
+                    OmitXmlDeclaration = false  // ✅ JÁ ESTAVA CORRETO (false)
                 };
-
                 using (var writer = XmlWriter.Create(pageObjectsPath, settings))
                 {
                     doc.Save(writer);
@@ -2634,7 +2620,6 @@ decryptor, CryptoStreamMode.Read))
                 // Silencioso por design
             }
         }
-
         /// <summary>
         /// Salva o XML com formatação adequada para a classe Hook
         /// </summary>
@@ -2738,7 +2723,7 @@ decryptor, CryptoStreamMode.Read))
                     NewLineHandling = NewLineHandling.Replace,
                     NewLineChars = "\r\n",
                     Encoding = utf8WithoutBom,
-                    OmitXmlDeclaration = true
+                    OmitXmlDeclaration = false  // ✅ ALTERADO DE true PARA false
                 };
 
                 using (var writer = XmlWriter.Create(filePath, settings))

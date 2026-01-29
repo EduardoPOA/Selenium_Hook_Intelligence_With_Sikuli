@@ -750,7 +750,7 @@
           }
         }
       },
-      "WebDriverManager/2.17.4": {
+      "WebDriverManager/2.17.6": {
         "type": "package",
         "dependencies": {
           "AngleSharp": "1.1.2",
@@ -2198,10 +2198,10 @@
         "version.txt"
       ]
     },
-    "WebDriverManager/2.17.4": {
-      "sha512": "Gseye/0QFH/njpNAhpsWZwa1zsB6iG/TxoANZkAJBMZ2hjpm/y3HyLop7JHXKZ3joHhgMFfJEYLbUmUS+jhK6A==",
+    "WebDriverManager/2.17.6": {
+      "sha512": "TyelgYIuQsa3i8gbJPJ6kPnsD7q74fFcGN6gHhIs3Vmm0DvbKd/2+aV9E/LdgcOLOo+mFJu0dgz5PfhJNooH4w==",
       "type": "package",
-      "path": "webdrivermanager/2.17.4",
+      "path": "webdrivermanager/2.17.6",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -2209,7 +2209,7 @@
         "lib/net472/WebDriverManager.dll",
         "lib/netstandard2.0/WebDriverManager.dll",
         "lib/netstandard2.1/WebDriverManager.dll",
-        "webdrivermanager.2.17.4.nupkg.sha512",
+        "webdrivermanager.2.17.6.nupkg.sha512",
         "webdrivermanager.nuspec"
       ]
     }
@@ -2227,7 +2227,7 @@
       "Reqnroll >= 2.4.1",
       "Selenium.Support >= 4.1.0",
       "Selenium.WebDriver >= 4.1.0",
-      "WebDriverManager >= 2.17.4"
+      "WebDriverManager >= 2.17.6"
     ]
   },
   "packageFolders": {
@@ -2235,7 +2235,7 @@
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
-    "version": "40.0.0",
+    "version": "43.0.0",
     "restore": {
       "projectUniqueName": "C:\\Users\\eduar\\OneDrive\\Área de Trabalho\\Git_Hub\\Selenium_Hook_Intelligence_With_Sikuli\\Hook_Validator\\Hook_Validator.csproj",
       "projectName": "Super_Automation_Sikuli",
@@ -2330,7 +2330,7 @@
           },
           "WebDriverManager": {
             "target": "Package",
-            "version": "[2.17.4, )"
+            "version": "[2.17.6, )"
           }
         },
         "imports": [

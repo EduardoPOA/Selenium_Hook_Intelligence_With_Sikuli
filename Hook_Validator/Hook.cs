@@ -285,7 +285,8 @@ namespace Hook_Validator
                     ChromeOptions optionChrome = new ChromeOptions();
 
                     optionChrome.AcceptInsecureCertificates = certificate;
-
+                    optionChrome.AddArgument("--lang=pt-BR");
+                    optionChrome.AddUserProfilePreference("intl.accept_languages", "pt-BR,pt");
                     // Anti-automation
                     optionChrome.AddExcludedArgument("enable-automation");
                     optionChrome.AddAdditionalOption("useAutomationExtension", false);
@@ -304,10 +305,7 @@ namespace Hook_Validator
                         optionChrome.AddArgument("--disable-gpu");
                         optionChrome.AddArgument("--disable-software-rasterizer");
                     }
-
-                    // 🔥 DOWNLOADS → BIN (PONTO-CHAVE)
                     string binPath = AppContext.BaseDirectory;
-
                     Directory.CreateDirectory(binPath);
 
                     optionChrome.AddUserProfilePreference("download.default_directory", binPath);
